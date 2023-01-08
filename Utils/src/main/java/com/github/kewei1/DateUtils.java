@@ -10,6 +10,21 @@ import java.util.TimeZone;
 
 public class DateUtils {
 
+    public static final String GMT = "EEE, dd MMM yyyy hh:mm:ss 'GMT'";
+
+    public static final String  UTC = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+
+    public static final String  DEFAULT = "yyyy-MM-dd HH:mm:ss";
+
+    public static final String  DATE = "yyyy-MM-dd";
+
+    public static final String  DATE_TIME = "yyyy-MM-dd HH:mm:ss";
+    
+    public static final int ONE_MINUTE = 60*1000;
+    public static final int ONE_HOUR   = 60*ONE_MINUTE;
+    public static final int ONE_DAY    = 24*ONE_HOUR;
+    public static final int CHINA    = 8*ONE_HOUR;
+
     /**
      * @author kewei
      * @date 2023/01/07
@@ -46,13 +61,13 @@ public class DateUtils {
 
         format = new SimpleDateFormat(pattern);
 
-        if(DateType.GMT.equals(pattern)){
+        if(GMT.equals(pattern)){
             //GMT时间  Mon, 11 May 2020 07:21:02 GMT
-            format = new SimpleDateFormat(DateType.GMT, Locale.ENGLISH);
+            format = new SimpleDateFormat(GMT, Locale.ENGLISH);
             format.setTimeZone(TimeZone.getTimeZone("GMT"));
-        }if (DateType.UTC.equals(pattern)) {
+        }if (UTC.equals(pattern)) {
             //UTC时间 2020-05-12T01:56:15.890Z**
-            format = new SimpleDateFormat(DateType.UTC, Locale.ENGLISH);
+            format = new SimpleDateFormat(UTC, Locale.ENGLISH);
             format.setTimeZone(TimeZone.getTimeZone("UTC"));
         }
 
@@ -71,7 +86,7 @@ public class DateUtils {
      * @doc 时间戳
      */
     public static long getTimeMillisGMT(String strDate ) {
-        DateFormat df = new SimpleDateFormat(DateType.GMT, Locale.ENGLISH);
+        DateFormat df = new SimpleDateFormat(GMT, Locale.ENGLISH);
         df.setTimeZone(TimeZone.getTimeZone("GMT"));
 
         try {
@@ -89,7 +104,7 @@ public class DateUtils {
      * @doc 时间戳
      */
     public static long getTimeMillisUTC(String strDate) {
-        DateFormat df = new SimpleDateFormat(DateType.UTC, Locale.ENGLISH);
+        DateFormat df = new SimpleDateFormat(UTC, Locale.ENGLISH);
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
         try {
             return getTimeMillis(df.parse(strDate));
@@ -106,7 +121,7 @@ public class DateUtils {
      * @doc 得到简单str日期
      */
     public static String getSimpleStrDate(Long timeMillis,Locale locale) {
-        SimpleDateFormat format = new SimpleDateFormat(DateType.DATE_TIME, locale);
+        SimpleDateFormat format = new SimpleDateFormat(DATE_TIME, locale);
 
         return format.format(new Date(timeMillis));
     }
@@ -118,7 +133,7 @@ public class DateUtils {
      * @doc 得到简单str日期
      */
     public static String getSimpleStrDate(Long timeMillis) {
-        SimpleDateFormat format = new SimpleDateFormat(DateType.DATE_TIME, Locale.getDefault());
+        SimpleDateFormat format = new SimpleDateFormat(DATE_TIME, Locale.getDefault());
         return format.format(new Date(timeMillis));
     }
 
@@ -136,12 +151,12 @@ public class DateUtils {
         timeMillis = timeMillis + zone;
         SimpleDateFormat format = new SimpleDateFormat(pattern, locale);
 
-        if(DateType.GMT.equals(pattern)){
+        if(GMT.equals(pattern)){
             //GMT时间  Mon, 11 May 2020 07:21:02 GMT
-            format = new SimpleDateFormat(DateType.GMT, Locale.ENGLISH);
-        }if (DateType.UTC.equals(pattern)) {
+            format = new SimpleDateFormat(GMT, Locale.ENGLISH);
+        }if (UTC.equals(pattern)) {
             //UTC时间 2020-05-12T01:56:15.890Z**
-            format = new SimpleDateFormat(DateType.UTC, Locale.ENGLISH);
+            format = new SimpleDateFormat(UTC, Locale.ENGLISH);
         }
 
         return format.format(new Date(timeMillis));
@@ -158,12 +173,12 @@ public class DateUtils {
     public static String getStrDate(Long timeMillis, String pattern, Locale locale ) {
         SimpleDateFormat format = new SimpleDateFormat(pattern, locale);
 
-        if(DateType.GMT.equals(pattern)){
+        if(GMT.equals(pattern)){
             //GMT时间  Mon, 11 May 2020 07:21:02 GMT
-            format = new SimpleDateFormat(DateType.GMT, Locale.ENGLISH);
-        }if (DateType.UTC.equals(pattern)) {
+            format = new SimpleDateFormat(GMT, Locale.ENGLISH);
+        }if (UTC.equals(pattern)) {
             //UTC时间 2020-05-12T01:56:15.890Z**
-            format = new SimpleDateFormat(DateType.UTC, Locale.ENGLISH);
+            format = new SimpleDateFormat(UTC, Locale.ENGLISH);
         }
 
         return format.format(new Date(timeMillis));
