@@ -8,14 +8,18 @@ import com.github.kewei1.HuStringUtils;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class Test {
 
+    private static  List<String> paths = new ArrayList<String>();
+
     public static void main(String[] args) throws Exception {
-//        deleteChina(null);
+        deleteChina("C:\\Users\\Administrator\\Documents");
+        System.out.println(paths);
     }
 
 
@@ -47,6 +51,8 @@ public class Test {
                 System.out.print("--文件夹");
                 System.out.println(fileLocation);
 
+
+
                 ArrayList<String> dir = Dir(new File(fileLocation));
                 System.out.println();
                 dir.stream().forEach(f->{
@@ -55,23 +61,29 @@ public class Test {
             } else {
                 System.out.print("--文件");
                 System.out.println(fileLocation);
-                Stream<String> of1 = StreamUtil.of(file, CharsetUtil.CHARSET_UTF_8);
-                StringBuilder content = new StringBuilder();
 
-                of1.forEachOrdered(e->{
-                    content.append(e.replaceAll(REGEX_CHINESE,"")).append("\n");
-                });
-
-                BufferedWriter out = null;
-                try {
-                    out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
-                    String target = content.toString();
-                    out.write(target);
-                    out.flush();
-                    out.close();
-                } catch (Exception e) {
-                }finally {
+                if(fileLocation.endsWith(".xlsx")){
+                    paths.add(fileLocation);
                 }
+
+
+//                Stream<String> of1 = StreamUtil.of(file, CharsetUtil.CHARSET_UTF_8);
+//                StringBuilder content = new StringBuilder();
+//
+//                of1.forEachOrdered(e->{
+//                    content.append(e.replaceAll(REGEX_CHINESE,"")).append("\n");
+//                });
+//
+//                BufferedWriter out = null;
+//                try {
+//                    out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
+//                    String target = content.toString();
+//                    out.write(target);
+//                    out.flush();
+//                    out.close();
+//                } catch (Exception e) {
+//                }finally {
+//                }
             }
         }
     }
@@ -90,13 +102,10 @@ public class Test {
                         dirStrArr.add(dirFile.getPath() + file.getName());
                     } else {
                         //否则，如果没有文件分隔符，则补上一个文件分隔符，再加上文件名，才是路径
-                        dirStrArr.add(dirFile.getPath() + File.separator
-                                + file.getName());
+                        dirStrArr.add(dirFile.getPath() + File.separator + file.getName());
                     }
                 }
             }
-
-
         }
         return dirStrArr;
     }
