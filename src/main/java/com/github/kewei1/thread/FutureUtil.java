@@ -13,12 +13,7 @@ public class FutureUtil {
      */
     private static ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*8);
 
-    /**
-     * 限时异步执行
-     *
-     * @param time 时间数，例：60
-     * @param timeUnit 时间单位，例：TimeUnit.SECONDS
-     */
+
     public static <T> Object synchronizeExecute(long time, TimeUnit timeUnit, Callable<T> callable) {
         Future future = executorService.submit(callable);
         try {

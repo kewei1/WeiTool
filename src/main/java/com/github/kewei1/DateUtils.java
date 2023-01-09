@@ -25,34 +25,18 @@ public class DateUtils {
     public static final int ONE_DAY    = 24*ONE_HOUR;
     public static final int CHINA    = 8*ONE_HOUR;
 
-    /**
-     * @author kewei
-     * @date 2023/01/07
-     * @params
-     * @doc 获取当前时间戳
-     */
+
     public static Long getTimeMillis() {
         return System.currentTimeMillis();
     }
 
-    /**
-     * @author kewei
-     * @date 2023/01/07
-     * @params @param date 日期
-     * @doc 时间戳
-     */
+
     public static Long getTimeMillis(Date date) {
         return date.getTime();
     }
 
 
-    /**
-     * @param pattern 样式
-     * @author kewei
-     * @date 2023/01/07
-     * @params @param strDate String日期
-     * @doc 时间戳
-     */
+
     public static long getTimeMillis(String strDate,String pattern) {
         if (strDate == null || strDate.isEmpty()) {
             return -1;
@@ -79,12 +63,7 @@ public class DateUtils {
     }
 
 
-    /**
-     * @author kewei
-     * @date 2023/01/07
-     * @params @param strDate GMT类型str日期
-     * @doc 时间戳
-     */
+
     public static long getTimeMillisGMT(String strDate ) {
         DateFormat df = new SimpleDateFormat(GMT, Locale.ENGLISH);
         df.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -97,12 +76,7 @@ public class DateUtils {
     }
 
 
-    /**
-     * @author kewei
-     * @date 2023/01/07
-     * @params @param strDate UTC类型str日期
-     * @doc 时间戳
-     */
+
     public static long getTimeMillisUTC(String strDate) {
         DateFormat df = new SimpleDateFormat(UTC, Locale.ENGLISH);
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -113,39 +87,20 @@ public class DateUtils {
         }
     }
 
-    /**
-     * @param locale 语言环境
-     * @author kewei
-     * @date 2023/01/07
-     * @params @param timeMillis 时间戳
-     * @doc 得到简单str日期
-     */
+
     public static String getSimpleStrDate(Long timeMillis,Locale locale) {
         SimpleDateFormat format = new SimpleDateFormat(DATE_TIME, locale);
 
         return format.format(new Date(timeMillis));
     }
 
-    /**
-     * @author kewei
-     * @date 2023/01/07
-     * @params @param timeMillis 时间戳
-     * @doc 得到简单str日期
-     */
+
     public static String getSimpleStrDate(Long timeMillis) {
         SimpleDateFormat format = new SimpleDateFormat(DATE_TIME, Locale.getDefault());
         return format.format(new Date(timeMillis));
     }
 
-    /**
-     * @param pattern 模式
-     * @param locale  语言环境
-     * @param zone    区
-     * @author kewei
-     * @date 2023/01/07
-     * @params @param timeMillis 时间戳
-     * @doc 得到str日期
-     */
+
     public static String getStrDate(Long timeMillis, String pattern, Locale locale ,int zone) {
 
         timeMillis = timeMillis + zone;
@@ -162,14 +117,7 @@ public class DateUtils {
         return format.format(new Date(timeMillis));
     }
 
-    /**
-     * @param pattern 模式
-     * @param locale  语言环境
-     * @author kewei
-     * @date 2023/01/07
-     * @params @param timeMillis 时间戳
-     * @doc 得到str日期
-     */
+
     public static String getStrDate(Long timeMillis, String pattern, Locale locale ) {
         SimpleDateFormat format = new SimpleDateFormat(pattern, locale);
 
@@ -184,20 +132,13 @@ public class DateUtils {
         return format.format(new Date(timeMillis));
     }
 
-    /**
-     * @param pattern 模式
-     * @author kewei
-     * @date 2023/01/07
-     * @params @param timeMillis 时间戳
-     * @doc 得到str日期
-     */
+
     public static String getStrDate(Long timeMillis, String pattern) {
         SimpleDateFormat format = new SimpleDateFormat(pattern, Locale.getDefault());
         return format.format(new Date(timeMillis));
     }
 
 
-    //一周前
     public static Long getWeekAgo() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -7);
@@ -567,13 +508,7 @@ public class DateUtils {
 
 
 
-    /**
-     * 获取当年的开始时间戳
-     *
-     * @param timeStamp 毫秒级时间戳
-     * @param timeZone  如 GMT+8:00
-     * @return
-     */
+
     public static Long getYearStartTime(Long timeStamp, String timeZone) {
         Calendar calendar = Calendar.getInstance();// 获取当前日期
         calendar.setTimeZone(TimeZone.getTimeZone(timeZone));
@@ -642,13 +577,7 @@ public class DateUtils {
 
 
 
-    /**
-     * 获取当年的最后时间戳
-     *
-     * @param timeStamp 毫秒级时间戳
-     * @param timeZone  如 GMT+8:00
-     * @return
-     */
+
     public static Long getYearEndTime(Long timeStamp, String timeZone) {
         Calendar calendar = Calendar.getInstance();// 获取当前日期
         calendar.setTimeZone(TimeZone.getTimeZone(timeZone));

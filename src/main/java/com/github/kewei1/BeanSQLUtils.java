@@ -126,13 +126,8 @@ public class BeanSQLUtils {
     }
 
 
-    /**
-     * 驼峰->下划线
-     *
-     * @param property
-     * @return
-     */
-    public static String toUnderscore(String property) {// 下划线
+
+    public static String toUnderscore(String property) {
         char[] chars = property.toCharArray();
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < chars.length; i++) {
@@ -153,8 +148,6 @@ public class BeanSQLUtils {
     }
 
     /**
-     * 生成每一个字段的SQL 语句String 形如： `user_name` varchar(255) DEFAULT NULL,
-     *
      * @param name
      * @param fieldName
      * @return
@@ -164,8 +157,6 @@ public class BeanSQLUtils {
     }
 
     /**
-     * 获取完整的类名 形如：com.xx.entity.Users
-     *
      * @param path
      * @return
      */
@@ -195,8 +186,6 @@ public class BeanSQLUtils {
 
 
     /**
-     * sql 生成 bean
-     *
      * @param sql sql
      * @return {@link String}
      */
@@ -223,7 +212,6 @@ public class BeanSQLUtils {
     }
 
     /**
-     * 将每一条sql 提取java属性类型 形如：`user_name` varchar(255) DEFAULT NULL, 提取为 private String userName;
      *
      * @param columnContent
      * @return

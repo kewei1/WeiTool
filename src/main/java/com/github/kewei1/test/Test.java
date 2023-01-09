@@ -6,6 +6,12 @@ import com.github.kewei1.thread.FutureUtil;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,26 +41,26 @@ public class Test {
         ends.add("pptx");
         ends.add("txt");
 
-        ends.add("jpg");
-        ends.add("jpeg");
-        ends.add("png");
-        ends.add("gif");
-        ends.add("bmp");
-        ends.add("ico");
-        ends.add("svg");
-
-        ends.add("mp3");
-        ends.add("wav");
-        ends.add("wma");
-        ends.add("ogg");
-        ends.add("ape");
-
-        ends.add("mp4");
-        ends.add("avi");
-        ends.add("rmvb");
-        ends.add("rm");
-        ends.add("flv");
-        ends.add("wmv");
+//        ends.add("jpg");
+//        ends.add("jpeg");
+//        ends.add("png");
+//        ends.add("gif");
+//        ends.add("bmp");
+//        ends.add("ico");
+//        ends.add("svg");
+//
+//        ends.add("mp3");
+//        ends.add("wav");
+//        ends.add("wma");
+//        ends.add("ogg");
+//        ends.add("ape");
+//
+//        ends.add("mp4");
+//        ends.add("avi");
+//        ends.add("rmvb");
+//        ends.add("rm");
+//        ends.add("flv");
+//        ends.add("wmv");
 
 
 
@@ -126,7 +132,19 @@ public class Test {
                     ends.forEach(e->{
                         if (fileLocation.endsWith(e)){
                             file.getName();
-                            File copyFile = new File(path +e+"\\"+ file.getName());
+
+                            String lastAccessTime = getLastAccessTime(file);
+
+                            String pathName =path +e+"\\"+lastAccessTime.replaceAll("-","").substring(0,6)+"\\";
+
+                            File pathFile = new File(pathName);
+                            if (!pathFile.exists()) {
+                                pathFile.mkdirs();
+                            }
+
+
+                            File copyFile = new File(pathName+ file.getName());
+
                             try {
                                 copyFile(file, copyFile);
                                 count++;
@@ -263,5 +281,72 @@ public class Test {
             }
         }
     }
+
+
+
+
+
+
+
+
+
+
+    public static String getCreationTime(File file) {
+        if (file == null) {
+            return null;
+        }
+
+        BasicFileAttributes attr = null;
+        try {
+            Path path =  file.toPath();
+            attr = Files.readAttributes(path, BasicFileAttributes.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // 创建时间
+        Instant instant = attr.creationTime().toInstant();
+        String format = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault()).format(instant);
+        return format;
+    }
+
+
+    public static String getLastAccessTime(File file) {
+        if (file == null) {
+            return null;
+        }
+
+        BasicFileAttributes attr = null;
+        try {
+            Path path =  file.toPath();
+            attr = Files.readAttributes(path, BasicFileAttributes.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // 上次访问时间
+        Instant instant = attr.lastAccessTime().toInstant();
+        String format = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault()).format(instant);
+        return format;
+    }
+
+
+    public static String getLastModifiedTime(File file) {
+        if (file == null) {
+            return null;
+        }
+        BasicFileAttributes attr = null;
+        try {
+            Path path =  file.toPath();
+            attr = Files.readAttributes(path, BasicFileAttributes.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // 更新时间
+        Instant instant = attr.lastModifiedTime().toInstant();
+        String format = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault()).format(instant);
+        return format;
+    }
+
+
+
 
 }
