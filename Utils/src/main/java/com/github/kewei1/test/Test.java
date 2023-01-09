@@ -20,7 +20,7 @@ public class Test {
 
     private static Integer count = 0;
 
-    private static String path = "C:\\Users\\15400\\Desktop\\WeiTool\\Utils\\src\\main\\resources\\";
+    private static String path = "D:\\File\\分类\\";
 
 
 
@@ -106,7 +106,7 @@ public class Test {
 
             if (null!=file &&file.exists()) {
 
-                if (file.isDirectory()) {
+                if (file.isDirectory() && !path.equals(fileLocation)) {
                     System.out.print("--文件夹");
                     System.out.println(fileLocation);
                     ArrayList<String> dir = Dir(new File(fileLocation));
