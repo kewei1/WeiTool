@@ -1,25 +1,80 @@
 package com.github.kewei1.test;
 
-import cn.hutool.Hutool;
-import cn.hutool.core.stream.StreamUtil;
-import cn.hutool.core.util.CharsetUtil;
+import com.alibaba.fastjson.parser.Feature;
 import com.github.kewei1.HuStringUtils;
+import com.github.kewei1.thread.FutureUtil;
 
 import java.io.*;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
+
 
 public class Test {
 
-    private static  List<String> paths = new ArrayList<String>();
+    private static  List<String> files = new ArrayList<String>();
+    private static  List<String> ends = new ArrayList<String>();
+
+    private static Integer count = 0;
+
+    private static String path = "C:\\Users\\15400\\Desktop\\WeiTool\\Utils\\src\\main\\resources\\";
+
+
+
 
     public static void main(String[] args) throws Exception {
-        deleteChina("C:\\Users\\Administrator\\Documents");
-        System.out.println(paths);
+        ends.add("pdf");
+        ends.add("doc");
+        ends.add("docx");
+        ends.add("xls");
+        ends.add("xlsx");
+        ends.add("ppt");
+        ends.add("pptx");
+        ends.add("txt");
+
+        ends.add("jpg");
+        ends.add("jpeg");
+        ends.add("png");
+        ends.add("gif");
+        ends.add("bmp");
+        ends.add("ico");
+        ends.add("svg");
+
+        ends.add("mp3");
+        ends.add("wav");
+        ends.add("wma");
+        ends.add("ogg");
+        ends.add("ape");
+
+        ends.add("mp4");
+        ends.add("avi");
+        ends.add("rmvb");
+        ends.add("rm");
+        ends.add("flv");
+        ends.add("wmv");
+
+
+
+
+        ends.stream().forEach(e->{
+            String dirStr = path+e.toString();
+            File directory = new File(dirStr);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+        });
+
+
+//        ends.add(".txt");
+//        ends.add(".rar");
+//        ends.add(".zip");
+//        ends.add(".7z");
+//        deleteChina("C:\\Users\\15400\\Documents");
+//        deleteChina("D:\\");
+        deleteChina();
     }
 
 
@@ -27,44 +82,61 @@ public class Test {
 
     public static void deleteChina(){
         deleteChina(null);
+        FutureUtil.shutdown();
     }
 
     public static void deleteChina(String fileLocation) {
+        count++;
+        System.out.println(count);
 
-        File file = null;
-        if (!HuStringUtils.isEmpty(fileLocation)){
-            file = new File(fileLocation);
-        }else {
-            File[] parts =File.listRoots();
+            File file;
+            if (!HuStringUtils.isEmpty(fileLocation)){
+                file = new File(fileLocation);
+            }else {
+                file = null;
+                File[] parts =File.listRoots();
 
-            Arrays.stream(parts).forEach(e->{
-                ArrayList<String> dir = Dir(new File(e.toString()));
-                dir.stream().forEach(f->{
-                    deleteChina(f);
+                Arrays.stream(parts).forEach(e->{
+                    ArrayList<String> dir = Dir(new File(e.toString()));
+                    dir.stream().forEach(f->{
+                        deleteChina(f);
+                    });
                 });
-            });
-        }
+            }
 
-        if (file.exists()) {
+            if (null!=file &&file.exists()) {
 
-            if (file.isDirectory()) {
-                System.out.print("--文件夹");
-                System.out.println(fileLocation);
+                if (file.isDirectory()) {
+                    System.out.print("--文件夹");
+                    System.out.println(fileLocation);
+                    ArrayList<String> dir = Dir(new File(fileLocation));
 
+                    FutureUtil.synchronizeExecute(2, TimeUnit.HOURS,()->{
+                        System.out.println("执行"+Thread.currentThread().getName());
+                        dir.stream().forEach(e->{
+                            deleteChina(e);
+                        });
+                        return null;
+                    });
 
+                } else {
+                    System.out.print("--文件");
+                    System.out.println(fileLocation);
 
-                ArrayList<String> dir = Dir(new File(fileLocation));
-                System.out.println();
-                dir.stream().forEach(f->{
-                    deleteChina(f);
-                });
-            } else {
-                System.out.print("--文件");
-                System.out.println(fileLocation);
-
-                if(fileLocation.endsWith(".xlsx")){
-                    paths.add(fileLocation);
-                }
+                    ends.forEach(e->{
+                        if (fileLocation.endsWith(e)){
+                            file.getName();
+                            File copyFile = new File(path +e+"\\"+ file.getName());
+                            try {
+                                copyFile(file, copyFile);
+                                count++;
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                            files.add(fileLocation);
+                            System.out.println(Thread.currentThread().getName());
+                        }
+                    });
 
 
 //                Stream<String> of1 = StreamUtil.of(file, CharsetUtil.CHARSET_UTF_8);
@@ -84,9 +156,31 @@ public class Test {
 //                } catch (Exception e) {
 //                }finally {
 //                }
+                }
+            }
+
+//            return null;
+
+
+
+    }
+
+    private static void copyFile(File source, File dest) throws IOException {
+        if (!dest.exists()) {
+            FileChannel inputChannel = null;
+            FileChannel outputChannel = null;
+            try {
+                inputChannel = new FileInputStream(source).getChannel();
+                outputChannel = new FileOutputStream(dest).getChannel();
+                outputChannel.transferFrom(inputChannel, 0, inputChannel.size());
+            } finally {
+                inputChannel.close();
+                outputChannel.close();
             }
         }
     }
+
+
 
 
     public static ArrayList<String> Dir(File dirFile)  {

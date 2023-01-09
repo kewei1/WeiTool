@@ -9,6 +9,13 @@
     <artifactId>Utils</artifactId>
     <name>Archetype - Utils</name>
     <url>http://maven.apache.org</url>
+    <dependencies>
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.30</version>
+        </dependency>
+    </dependencies>
 
 
     <build>
