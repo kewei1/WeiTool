@@ -130,17 +130,17 @@
   <build>
     <plugins>
       <!--编译-->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.10.1</version>
-      </plugin>
+<!--      <plugin>-->
+<!--        <groupId>org.apache.maven.plugins</groupId>-->
+<!--        <artifactId>maven-compiler-plugin</artifactId>-->
+<!--        <version>3.10.1</version>-->
+<!--      </plugin>-->
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>2.2.1</version>
-      </plugin>
+<!--      <plugin>-->
+<!--        <groupId>org.apache.maven.plugins</groupId>-->
+<!--        <artifactId>maven-source-plugin</artifactId>-->
+<!--        <version>2.2.1</version>-->
+<!--      </plugin>-->
 
 
       <!--      doc-->
@@ -164,21 +164,18 @@
       </plugin>
 
       <!--签名-->
+      <!-- Gpg Signature -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.5</version>
+        <version>1.6</version>
         <executions>
           <execution>
-            <id>ossrh</id>
+            <id>sign-artifacts</id>
             <phase>verify</phase>
             <goals>
               <goal>sign</goal>
             </goals>
-            <!--            <configuration>-->
-            <!--              <keyname>keweii@qq.com</keyname>-->
-            <!--              <passphraseServerId>keweii@qq.com</passphraseServerId>-->
-            <!--            </configuration>-->
           </execution>
         </executions>
       </plugin>
@@ -186,17 +183,17 @@
 
 
 
-<!--      <plugin>-->
-<!--        <groupId>org.sonatype.plugins</groupId>-->
-<!--        <artifactId>nexus-staging-maven-plugin</artifactId>-->
-<!--        <version>1.6.7</version>-->
-<!--        <extensions>true</extensions>-->
-<!--        <configuration>-->
-<!--          <serverId>releases</serverId>-->
-<!--          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>-->
-<!--          <autoReleaseAfterClose>true</autoReleaseAfterClose>-->
-<!--        </configuration>-->
-<!--      </plugin>-->
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.7</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>releases</serverId>
+          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+        </configuration>
+      </plugin>
 
 
 
@@ -213,19 +210,19 @@
 <!--      </plugin>-->
 
 
-<!--      <plugin>-->
-<!--        <groupId>org.apache.maven.plugins</groupId>-->
-<!--        <artifactId>maven-source-plugin</artifactId>-->
-<!--        <version>2.2.1</version>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <id>ossrh</id>-->
-<!--            <goals>-->
-<!--              <goal>jar-no-fork</goal>-->
-<!--            </goals>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--      </plugin>-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
+        <executions>
+          <execution>
+            <id>ossrh</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
 
 
