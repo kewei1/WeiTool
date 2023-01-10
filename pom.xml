@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.kewei1</groupId>
   <artifactId>WeiTool</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0-0</version>
 
   <packaging>pom</packaging>
   <name>Archetype - WeiTool</name>
@@ -81,12 +81,12 @@
   <distributionManagement>
 
     <snapshotRepository>
-      <id>ossrh</id>
+      <id>releases</id>
       <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
 
     <repository>
-      <id>ossrh</id>
+      <id>snapshots</id>
       <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
 
@@ -104,7 +104,7 @@
         <version>1.6.7</version>
         <extensions>true</extensions>
         <configuration>
-          <serverId>ossrh</serverId>
+          <serverId>releases</serverId>
           <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
           <autoReleaseAfterClose>true</autoReleaseAfterClose>
         </configuration>
@@ -118,7 +118,7 @@
         <version>1.6.7</version>
         <extensions>true</extensions>
         <configuration>
-          <serverId>ossrh</serverId>
+          <serverId>releases</serverId>
           <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
           <autoReleaseAfterClose>true</autoReleaseAfterClose>
         </configuration>
@@ -165,10 +165,10 @@
             <goals>
               <goal>sign</goal>
             </goals>
-            <configuration>
-              <keyname>D6469996BDF75E9C</keyname>
-              <passphraseServerId>D6469996BDF75E9C</passphraseServerId>
-            </configuration>
+<!--            <configuration>-->
+<!--              <keyname>keweii@qq.com</keyname>-->
+<!--              <passphraseServerId>keweii@qq.com</passphraseServerId>-->
+<!--            </configuration>-->
           </execution>
         </executions>
       </plugin>
