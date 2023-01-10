@@ -2,39 +2,25 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+  <packaging>pom</packaging>
+
+
+
   <groupId>io.github.kewei1</groupId>
   <artifactId>WeiTool</artifactId>
   <version>1.0-0</version>
 
-  <packaging>pom</packaging>
-  <name>Archetype - WeiTool</name>
-  <url>http://maven.apache.org</url>
 
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    </license>
-  </licenses>
 
-  <developers>
-    <developer>
-      <name>kewei</name>
-      <email>keweii@qq.com</email>
-    </developer>
-  </developers>
-
-  <scm>
-    <connection>scm:git:git@github.com:kewei1/WeiTool.git</connection>
-    <developerConnection>scm:git:git@github.com:kewei1/WeiTool.git</developerConnection>
-    <url>git@github.com:kewei1/WeiTool.git</url>
-  </scm>
+  <name>WeiTool</name>
+  <description>WeiTool Java工具包</description>
+  <url>https://github.com/kewei1/WeiTool</url>
+  <inceptionYear>2023</inceptionYear>
 
 
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+
+
 
 
   <dependencies>
@@ -78,15 +64,64 @@
 
   </dependencies>
 
+
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A bussiness-friendly oss license</comments>
+    </license>
+  </licenses>
+
+
+  <scm>
+    <connection>scm:git:git@github.com:kewei1/WeiTool.git</connection>
+    <developerConnection>https://github.com/kewei1/WeiTool</developerConnection>
+    <url>https://github.com/kewei1/WeiTool</url>
+  </scm>
+
+  <issueManagement>
+    <system>Github</system>
+    <url>https://github.com/kewei1/WeiTool/issues</url>
+  </issueManagement>
+
+  <organization>
+    <name>WeiTool</name>
+    <url>https://github.com/kewei1/WeiTool</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <name>柯伟</name>
+      <email>keweii@qq.com</email>
+      <organization>WeiTool</organization>
+      <organizationUrl>https://github.com/kewei1/WeiTool</organizationUrl>
+    </developer>
+  </developers>
+
+
+
+
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.compiler.source>UTF-8</project.compiler.source>
+    <project.compiler.target>UTF-8</project.compiler.target>
+    <!--    打包跳过单元测试-->
+    <skipTests>true</skipTests>
+  </properties>
+
+
   <distributionManagement>
 
     <snapshotRepository>
-      <id>releases</id>
+      <id>ossrh</id>
       <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
 
     <repository>
-      <id>snapshots</id>
+      <id>ossrh</id>
       <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
 
@@ -94,52 +129,21 @@
 
   <build>
     <plugins>
-
-
-
-
+      <!--编译-->
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.7</version>
-        <extensions>true</extensions>
-        <configuration>
-          <serverId>releases</serverId>
-          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
-        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.10.1</version>
       </plugin>
-
-
-
-      <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.7</version>
-        <extensions>true</extensions>
-        <configuration>
-          <serverId>releases</serverId>
-          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
-        </configuration>
-      </plugin>
-
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <version>2.2.1</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar-no-fork</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 
 
+      <!--      doc-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -152,26 +156,81 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <encoding>UTF-8</encoding>
+          <charset>UTF-8</charset>
+          <docencoding>UTF-8</docencoding>
+        </configuration>
       </plugin>
 
+      <!--签名-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
         <version>1.5</version>
         <executions>
           <execution>
-            <id>sign-artifacts</id>
+            <id>ossrh</id>
             <phase>verify</phase>
             <goals>
               <goal>sign</goal>
             </goals>
-<!--            <configuration>-->
-<!--              <keyname>keweii@qq.com</keyname>-->
-<!--              <passphraseServerId>keweii@qq.com</passphraseServerId>-->
-<!--            </configuration>-->
+            <!--            <configuration>-->
+            <!--              <keyname>keweii@qq.com</keyname>-->
+            <!--              <passphraseServerId>keweii@qq.com</passphraseServerId>-->
+            <!--            </configuration>-->
           </execution>
         </executions>
       </plugin>
+
+
+
+
+<!--      <plugin>-->
+<!--        <groupId>org.sonatype.plugins</groupId>-->
+<!--        <artifactId>nexus-staging-maven-plugin</artifactId>-->
+<!--        <version>1.6.7</version>-->
+<!--        <extensions>true</extensions>-->
+<!--        <configuration>-->
+<!--          <serverId>releases</serverId>-->
+<!--          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>-->
+<!--          <autoReleaseAfterClose>true</autoReleaseAfterClose>-->
+<!--        </configuration>-->
+<!--      </plugin>-->
+
+
+
+<!--      <plugin>-->
+<!--        <groupId>org.sonatype.plugins</groupId>-->
+<!--        <artifactId>nexus-staging-maven-plugin</artifactId>-->
+<!--        <version>1.6.7</version>-->
+<!--        <extensions>true</extensions>-->
+<!--        <configuration>-->
+<!--          <serverId>releases</serverId>-->
+<!--          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>-->
+<!--          <autoReleaseAfterClose>true</autoReleaseAfterClose>-->
+<!--        </configuration>-->
+<!--      </plugin>-->
+
+
+<!--      <plugin>-->
+<!--        <groupId>org.apache.maven.plugins</groupId>-->
+<!--        <artifactId>maven-source-plugin</artifactId>-->
+<!--        <version>2.2.1</version>-->
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <id>ossrh</id>-->
+<!--            <goals>-->
+<!--              <goal>jar-no-fork</goal>-->
+<!--            </goals>-->
+<!--          </execution>-->
+<!--        </executions>-->
+<!--      </plugin>-->
+
+
+
+
+
 
 
 
