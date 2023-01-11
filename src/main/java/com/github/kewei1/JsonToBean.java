@@ -63,20 +63,20 @@ public class JsonToBean {
             }else {
                 type = "varchar(100)";
             }
-            sqlRowNameBuffer.append(key).append(" ").append(type).append(" ").append("CHARACTER SET utf8 NULL");
+            sqlRowNameBuffer.append(key).append(" ").append(type).append(" ").append("NULL");
             if (key.equals("id")){
                 hasId = true;
-                sqlRowNameBuffer.append(" ").append("NOT NULL AUTO_INCREMENT,").append("\r\n");
+                sqlRowNameBuffer.append(" ").append("NOT NULL ,").append("\r\n");
             }else {
                 sqlRowNameBuffer.append(",").append("\r\n");
             }
         }
         if (!hasId){
-            sqlRowNameBuffer.append("id").append(" ").append("int(100)").append(" ").append(" ")
-                    .append("NOT NULL AUTO_INCREMENT,").append(" PRIMARY KEY (`id`),");
+            sqlRowNameBuffer.append("id").append(" ").append("int(12)").append(" ").append(" ")
+                    .append("NOT NULL ,").append(" PRIMARY KEY (`id`)");
         }
         sqlRowNameBuffer.deleteCharAt(sqlRowNameBuffer.length() - 1);
-        sqlRowNameBuffer.append(") ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+        sqlRowNameBuffer.append(") ENGINE=InnoDB;");
         String sqlRowName = sqlRowNameBuffer.toString();
         return sqlRowName;
     }
@@ -120,7 +120,7 @@ public class JsonToBean {
                 "}\n" +
                 "}";
         // create table
-        String jsontosql = jsontosql("test.sql", yy);
+        String jsontosql = jsontosql("test", yy);
     }
 
 
