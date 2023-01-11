@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import main.java.com.github.kewei1.xxlJob.XxlJobUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -61,13 +62,8 @@ public class JenkinsUtils {
     private static String JENKINS_TOKEN = "";
     private static String JENKINS_USERNAME = "";
 
-//    static {
-//        BASE_URL = SpringUtil.getProperty("jenkins.url");
-//        JENKINS_TOKEN = SpringUtil.getProperty("jenkins.token");
-//        JENKINS_USERNAME = SpringUtil.getProperty("jenkins.username");
-//    }
 
-    public void JenkinsUtils(String url,String token,String username){
+    public  JenkinsUtils(String url,String token,String username){
         BASE_URL = url;
         JENKINS_TOKEN = token;
         JENKINS_USERNAME = username;
@@ -75,7 +71,7 @@ public class JenkinsUtils {
 
 
 
-    public static  String customHttpMsg(String url, HttpRequest httpRequest) throws Exception {
+    public  String customHttpMsg(String url, HttpRequest httpRequest) throws Exception {
         URI uri = new URI(url);
 
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
@@ -94,7 +90,7 @@ public class JenkinsUtils {
         }
     }
 
-    public static   JSONArray getJobs()  {
+    public    JSONArray getJobs()  {
         String JENKINS_URL =BASE_URL+SUFFIX;
         HttpPost httpPost = new HttpPost(JENKINS_URL);
         String res = null;
@@ -107,7 +103,7 @@ public class JenkinsUtils {
         return parse.getJSONArray("jobs");
     }
 
-    public static  JSONArray getNumbers(String job) {
+    public   JSONArray getNumbers(String job) {
         String JENKINS_URL =BASE_URL+JOB+job+SUFFIX;
         HttpPost httpPost = new HttpPost(JENKINS_URL);
         String res = null;
@@ -120,7 +116,7 @@ public class JenkinsUtils {
         return parse.getJSONArray("builds");
     }
 
-    public static  JSONObject getBuild(String job,String build)  {
+    public   JSONObject getBuild(String job,String build)  {
         String JENKINS_URL =BASE_URL+JOB+job+"/"+build+SUFFIX;
         HttpPost httpPost = new HttpPost(JENKINS_URL);
         String res = null;
