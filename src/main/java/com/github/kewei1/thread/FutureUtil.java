@@ -8,6 +8,8 @@ import java.util.concurrent.*;
 
 public class FutureUtil {
 
+
+
     /**
      * 创建两倍于系统线程数大小的线程池
      */
@@ -33,6 +35,7 @@ public class FutureUtil {
 
 
     public static void main(String[] args) {
+
         for (int i = 0; i < 100; i++) {
 
             synchronizeExecute(2, TimeUnit.HOURS,()->{
@@ -41,6 +44,8 @@ public class FutureUtil {
                 return null;
             });
         }
+
+
         executorService.shutdown();
 
     }
