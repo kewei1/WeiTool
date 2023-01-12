@@ -1,10 +1,11 @@
 package com.github.kewei1.github;
 
-import com.sun.media.jfxmediaimpl.HostUtils;
+
+import com.github.kewei1.test.StrUtils;
 
 public class test {
     public static void main(String[] args) {
-        GitHubHost.config(GitHubHost.ADDRESSV4);
+        System.out.println(StrUtils.abbreviate("123456789", 10));
 
     }
 }

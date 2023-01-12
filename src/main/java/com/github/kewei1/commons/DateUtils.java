@@ -1,4 +1,6 @@
-package com.github.kewei1;
+package com.github.kewei1.commons;
+
+import cn.hutool.core.date.DateTime;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -8,7 +10,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class DateUtils {
+public class DateUtils extends DateTime {
 
     public static final String GMT = "EEE, dd MMM yyyy hh:mm:ss 'GMT'";
 

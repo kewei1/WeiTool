@@ -82,7 +82,6 @@ public class GitHubHost {
         of1.forEachOrdered(e -> {
             if (null!=e && !e.equals("") && e.length()>0 && !e.contains("github") &&  !e.startsWith("#")){
                 content.append(e).append("\n");
-                count++;
             }
         });
 
@@ -237,20 +236,9 @@ public class GitHubHost {
                 list.add(jsonObject);
             }
         }
-
-
-
-        String[] ipv6 = result.split("https://www.ipaddress.com/ipv6/");
-        Pattern ipv6Pattern = Pattern.compile(IPV6);
-        List<String> ipv6s = new ArrayList<>();
-        for (String s1 : ipv6) {
-            String substring = s1.substring(0, s1.indexOf(">"));
-            Matcher m = ipv6Pattern.matcher(substring); // 获取 matcher 对象
-            if (m.find()) {
-                ipv6s.add(substring.substring(m.start(), m.end()));
-            }
+        if(list.size() == 0){
+            return "## 连接超时"  ;
         }
-
 
         JSONObject speed = list.stream().min(Comparator.comparing(e -> e.getLong("speed"))).get();
 
