@@ -37,17 +37,7 @@ public class XxlJobUtils {
         USERNAME = username;
         PASSWORD = password;
         BASE_URL = url;
-    }
 
-
-
-
-
-
-    private final static MediaType mediaType = MediaType.parse("multipart/form-data; boundary=---011000010111000001101001") ;
-    private final static RequestBody body = RequestBody.create(mediaType, "-----011000010111000001101001--\r\n\r\n");
-
-    static {
         Request request = new Request.Builder()
                 .url(BASE_URL+LOGIN_URL+"?userName="+ USERNAME+"+&password="+PASSWORD)
                 .post(body)
@@ -60,6 +50,14 @@ public class XxlJobUtils {
         } catch (IOException e) {
         }
     }
+
+
+
+
+    private final static MediaType mediaType = MediaType.parse("multipart/form-data; boundary=---011000010111000001101001") ;
+    private final static RequestBody body = RequestBody.create(mediaType, "-----011000010111000001101001--\r\n\r\n");
+
+
 
 
     public  String getJobLog(int jobGroup, int jobId, int logStatus , int start, int length, String jobStartTime, String jobEndTime) {

@@ -219,7 +219,14 @@ public class GitHubHost {
     private final static String getIpforIpaddressV4(String domain){
         queryCount++;
         System.out.println(StrUtil.format("正在 查询{}DNS \n",domain));
-        String result = HttpUtil.get(ADDRESSV4+domain);
+        String result ="";
+        try {
+             result = HttpUtil.get(ADDRESSV4+domain);
+        }catch (Exception e){
+            return "## 连接超时"  ;
+        }
+
+
         System.out.println(StrUtil.format("查询{}DNS 成功 \n",domain));
 
         String[] ipv4 = result.split("https://www.ipaddress.com/ipv4/");

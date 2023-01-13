@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.kewei1.model.JsonMetaNode;
 
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -73,10 +74,10 @@ public class JsonToBean {
         }
         if (!hasId){
             sqlRowNameBuffer.append("id").append(" ").append("int(12)").append(" ").append(" ")
-                    .append("NOT NULL ,").append(" PRIMARY KEY (`id`)");
+                    .append("NOT NULL ,").append("\r\n PRIMARY KEY (`id`) ");
         }
         sqlRowNameBuffer.deleteCharAt(sqlRowNameBuffer.length() - 1);
-        sqlRowNameBuffer.append(") ENGINE=InnoDB;");
+        sqlRowNameBuffer.append(" ) ENGINE=InnoDB;");
         String sqlRowName = sqlRowNameBuffer.toString();
         return sqlRowName;
     }
@@ -107,7 +108,7 @@ public class JsonToBean {
     }
 
 
-    public static void main(String[] args) {
+    public static void main1(String[] args) {
 
         String s = "{\"p_id\":\"73\",\"p_title\":\"微光波炉\\/烤箱保养\",\"p_mode\":\"1\",\"p_summary\":\"健康生活\",\"p_icon\":\"1491634953186.jpeg\",\"p_imageUrl\":null,\"p_priceA\":\"80\",\"p_priceB\":null,\"p_duration\":\"60\",\"p_introduce\":\"微波炉、烤箱等长时间不清洁会造成机器内汤汁堆积，对加热食物带来种种异味，滋生细菌，直接会导致肠道疾病。我们的高温深层次消毒服务，将微波炉进行深度清洁，去异味，高温杀菌，保障健康生活，延长微波炉使用寿命。\",\"p_fit_people\":\"微波炉\\/烤箱\",\"p_service_introduce\":\"\",\"p_pubtime\":\"1491634954\",\"p_pv\":\"1927\",\"c_id\":\"30\",\"m_id\":\"100\"}";
         String yy = "{\n" +
@@ -119,10 +120,108 @@ public class JsonToBean {
                 "\t\"cat\":{\"name\":\"Matilda\"}\n" +
                 "}\n" +
                 "}";
+
+        String json = "{\"APP_HEAD\": {\"TOTAL_NUM\": \"-1\",\"PGUP_OR_PGDN\": \"0\"},\"SYS_HEAD\": {\"RET\": [{\"RET_CODE\": \"000000\",\"RET_MSG\": \"000000 SUCCESS\"},{\"RET_CODE\": \"000001\",\"RET_MSG\": \"000001 SUCCESS\"}],\"AUTH_USER_ID\": null,\"RUN_DATE\": \"20211222\",\"MESSAGE_CODE\": \"369285\",\"SOURCE_BRANCH_NO\": \"142857\"},\"BODY\": [{\"createDate\":\"20220630\",\"fileName\":\"RB_TRAN_HIST_20220630_2_1.txt\",\"filePath\":\"/acc/abcd/20220630\",\"fileScence\":\"abcd\",\"fileType\":\"txt\",\"systemId\":\"ACC\"},{\"createDate\":\"20220630\",\"fileName\":\"RB_TRAN_HIST_20220630_2_2.txt\",\"filePath\":\"/acc/abcd/20220630\",\"fileScence\":\"abcd\",\"fileType\":\"txt\",\"systemId\":\"ACC\"}]}";
+        System.out.println(format(json));
         // create table
-        String jsontosql = jsontosql("test", yy);
+        String jsontosql = jsontosql("test", format(json));
+
+
     }
 
 
 
-}
+
+    //JDBC 连接数据库 批量插入 账号密码
+    public static void jdbcBatch(String sql,String user,String password) throws ClassNotFoundException, SQLException {
+        //1.加载驱动程序
+        Class.forName("com.mysql.jdbc.Driver");
+        //No suitable driver found for jdbc:mysql
+        //2.获得数据库的连接
+        Connection conn = DriverManager.getConnection("jdbc:mysql://192.168.1.17:6033/hshsi", user, password);
+        //3.通过数据库的连接操作数据库，实现增删改查
+        Statement stmt = conn.createStatement();
+        //4.处理数据库的返回结果(使用ResultSet类)
+        ResultSet rs = stmt.executeQuery(sql);
+        //如果有数据，rs.next()返回true
+        while (rs.next()) {
+            System.out.println(rs.getString("id") + " " + rs.getString("name"));
+        }
+    }
+
+
+
+
+
+    public static void main(String[] args) {
+        String sql = "SELECT\n" +
+                "    tbv.code,\n" +
+                "    tbv.name,\n" +
+                "    tbs.system_no ,\n" +
+                "    tbs.system_name,\n" +
+                "    tbe.event_no,\n" +
+                "    tbe.event_name\n" +
+                "FROM t_bpoint_record tbr\n" +
+                "    left join t_bpoint_var tbv on tbr.var_id = tbv.code\n" +
+                "    left join t_bpoint_event tbe on tbv.event_id = tbe.event_no\n" +
+                "    left join t_bpoint_system tbs on tbs.system_no = tbe.system_no\n" +
+                "where (1=1 ) group by tbv.code;";
+        try {
+            jdbcBatch(sql,"root","nmamtf@hsh");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+
+        public static String format(String jsonStr) {
+            int level = 0;
+            StringBuffer jsonForMatStr = new StringBuffer();
+            for (int i = 0; i < jsonStr.length(); i++) {
+                char c = jsonStr.charAt(i);
+                if (level > 0 && '\n' == jsonForMatStr.charAt(jsonForMatStr.length() - 1)) {
+                    jsonForMatStr.append(getLevelStr(level));
+                }
+                switch (c) {
+                    case '{':
+                    case '[':
+                        jsonForMatStr.append(c).append("\n");
+                        level++;
+                        break;
+                    case ',':
+                        jsonForMatStr.append(c).append("\n");
+                        break;
+                    case '}':
+                    case ']':
+                        jsonForMatStr.append("\n");
+                        level--;
+                        jsonForMatStr.append(getLevelStr(level));
+                        jsonForMatStr.append(c);
+                        break;
+                    default:
+                        jsonForMatStr.append(c);
+                        break;
+                }
+            }
+
+            return jsonForMatStr.toString();
+
+        }
+
+        private static String getLevelStr(int level) {
+            StringBuffer levelStr = new StringBuffer();
+            for (int levelI = 0; levelI < level; levelI++) {
+                levelStr.append("\t");
+            }
+            return levelStr.toString();
+        }
+
+
+    }
+
+
+
+
