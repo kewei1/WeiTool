@@ -10,36 +10,177 @@ import com.alibaba.fastjson.JSONObject;
 import java.io.*;
 import java.net.InetAddress;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+/**
+ * @author kewei
+ * @date 2023/02/03
+ * @doc github hosts 配置<br>
+ *  1.获取原始hosts文件 <br>
+ *  2.获取github hosts信息<br>
+ *  3.合并hosts文件<br>
+ *  4.写入hosts文件<br>
+ *  5.刷新dns缓存<br>
+ */
 public class GitHubHost {
 
+    /**
+     * @doc 需要配置host的域名
+     * @see @see Set<String>
+     */
     private static Set<String>  HOSTS =  new HashSet<>();
+    /**
+     * @doc host内容
+     * @see @see StringBuilder
+     */
     private static StringBuilder content = new StringBuilder();
-    private static int count = 0;
+
+
+
+    /**
+     * @doc ping超时信息统计
+     * @see
+     */
     private static int overtimePing = 0;
+    /**
+     * @doc ping成功信息统计
+     * @see
+     */
     private static int successPing = 0;
+    /**
+     * @doc ping成功数统计
+     * @see
+     */
     private static int successCount = 0;
+    /**
+     * @doc ping总数统计
+     * @see
+     */
     private static int pingCount = 0;
+    /**
+     * @doc DNS查询统计
+     * @see
+     */
     private static int queryCount = 0;
 
+    /**
+     * @doc 程序运行时间
+     * @see @see Long
+     */
     private static  Long speeed = 0L;
 
+
+    /**
+     * @doc MySSL DNS查询
+     * @see @see String
+     */
     public static final String MYSSL = "https://myssl.com/api/v1/tools/dns_query?qtype=1&qmode=-1&host=";
 
+    /**
+     * @doc AddressV4 DNS查询
+     * @see @see String
+     */
     public static final String ADDRESSV4 = "https://www.ipaddress.com/site/";
+    /**
+     * @doc AddressV6 DNS查询
+     * @see @see String
+     */
     private static final String ADDRESSV6 = "https://www.ipaddress.com/site/";
 
 
+    /**
+     * @doc 传入 dns类型
+     * @see @see String
+     */
     private static  String DNS_TYPE = "";
 
+    /**
+     * @doc IPV4正则
+     * @see @see String
+     */
     private final static String IPV4 = "((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}";
+
+    /**
+     * @doc IPV6正则
+     * @see @see String
+     */
     private final static String IPV6 ="((?:[\\da-fA-F]{0,4}:[\\da-fA-F]{0,4}){2,7})(?:[\\/\\\\%](\\d{1,3}))?";
 
-    private final static void  init() {
+
+    /**
+     * @author kewei
+     * @date 2023/02/03
+     * @params
+     * @doc 初始化
+     */
+    private final static void  init() throws InterruptedException {
+
+        setHOSTS();
+
+        System.out.println("获取原始hosts文件");
+        File file = new File("C:\\Windows\\System32\\drivers\\etc\\hosts");
+        Stream<String> of1 = StreamUtil.of(file, CharsetUtil.CHARSET_UTF_8);
+        System.out.println("获取原始hosts文件成功");
+
+        System.out.println("开始处理hosts文件 非github DNS 保留");
+        content.append("## 非github DNS").append("\n");
+        of1.forEachOrdered(e -> {
+            if (null!=e && !e.equals("") && e.length()>0 && !e.contains("github") &&  !e.startsWith("#")){
+                content.append(e).append("\n");
+            }
+        });
+        System.out.println("处理hosts文件 非github DNS 保留成功");
+
+
+        System.out.println("开始处理hosts文件 github DNS");
+        content.append("\n\n\n\n## github DNS").append("\n");
+        final int threadSize = HOSTS.size();
+        final CountDownLatch countDownLatch = new CountDownLatch(threadSize);
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        HOSTS.stream().forEach(e -> {
+            executorService.execute(() -> {
+                String ip ="";
+
+                if (DNS_TYPE.equals(MYSSL)){
+                    ip = getIpforMyssl(e);
+                }
+                if (DNS_TYPE.equals(ADDRESSV4)){
+                    ip = getIpforIpaddressV4(e);
+                }
+//                    if (DNS_TYPE.equals(ADDRESSV6)){
+//                        getIpforIpaddressV6(e);
+//                    }
+
+                if (!StrUtil.isBlankIfStr(ip)) {
+                    if (!ip.contains("## 连接耗时99999")) {
+                        content.append(ip).append(" ").append(e).append("\n");
+                        successCount++;
+                    }
+                }
+
+
+                countDownLatch.countDown();
+            });
+        });
+        countDownLatch.await();
+        System.out.println("处理hosts文件 github DNS 成功");
+        executorService.shutdown();
+        saveHOSTS();
+    }
+
+    /**
+     * @author kewei
+     * @date 2023/02/03
+     * @params
+     * @doc 设置hosts文件
+     */
+    private static void setHOSTS() {
         HOSTS.add("github.com");
         HOSTS.add("github.global.ssl.fastly.net");
         HOSTS.add("github-cloud.s3.amazonaws.com");
@@ -73,92 +214,85 @@ public class GitHubHost {
         HOSTS.add("marketplace-screenshots.githubusercontent.com");
         HOSTS.add("raw.github.com");
         HOSTS.add("www.github.com");
-
-
-        File file = new File("C:\\Windows\\System32\\drivers\\etc\\hosts");
-        Stream<String> of1 = StreamUtil.of(file, CharsetUtil.CHARSET_UTF_8);
-
-        content.append("## 非github DNS").append("\n");
-        of1.forEachOrdered(e -> {
-            if (null!=e && !e.equals("") && e.length()>0 && !e.contains("github") &&  !e.startsWith("#")){
-                content.append(e).append("\n");
-            }
-        });
-
-        content.append("\n\n\n\n## github DNS").append("\n");
-        HOSTS.stream().forEach(e -> {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    String ip ="";
-
-                    if (DNS_TYPE.equals(MYSSL)){
-                        ip = getIpforMyssl(e);
-                    }
-                    if (DNS_TYPE.equals(ADDRESSV4)){
-                        ip = getIpforIpaddressV4(e);
-                    }
-//                    if (DNS_TYPE.equals(ADDRESSV6)){
-//                        getIpforIpaddressV6(e);
-//                    }
-
-                    count++;
-                    if (!StrUtil.isBlankIfStr(ip)) {
-                        if (!ip.contains("## 连接耗时99999")) {
-                            content.append(ip).append(" ").append(e).append("\n");
-                            successCount++;
-                        }
-                    }
-
-                    if (count == HOSTS.size()) {
-                        writeHost();
-                        System.out.println(content.toString());
-                        System.out.println(StrUtil.format("获取{}次DNS记录",queryCount));
-                        System.out.println(StrUtil.format("测速{}次",pingCount));
-                        System.out.println(StrUtil.format("成功{}次",successPing));
-                        System.out.println(StrUtil.format("超时{}次",overtimePing));
-
-                        System.out.println(StrUtil.format("配置成功{}条DNS记录\n",successCount));
-
-                        System.out.println(StrUtil.format("执行耗时{}秒",(System.currentTimeMillis() -speeed)/1000));
-                        System.out.println("配置完成");
-                        System.out.println("请重启浏览器");
-                    }
-                }
-            },e).start();
-        });
-
+        HOSTS.add("docs.github.com");
+        HOSTS.add("github.io");
+        HOSTS.add("dtstack.github.io");
     }
 
-    public static void config(String dnsType) {
+
+    /**
+     * @author kewei
+     * @date 2023/02/03
+     * @params
+     * @doc 保存hosts文件
+     */
+    private static void saveHOSTS() {
+        writeHost();
+        System.out.println(StrUtil.format("获取{}次DNS记录",queryCount));
+        System.out.println(StrUtil.format("测速{}次",pingCount));
+        System.out.println(StrUtil.format("成功{}次",successPing));
+        System.out.println(StrUtil.format("超时{}次",overtimePing));
+        System.out.println(StrUtil.format("配置成功{}条DNS记录\n",successCount));
+        System.out.println(StrUtil.format("执行耗时{}秒",(System.currentTimeMillis() -speeed)/1000));
+        System.out.println("配置完成");
+        System.out.println("请重启浏览器");
+    }
+
+    /**
+     * @author kewei
+     * @date 2023/02/03
+     * @params @param dnsType dns类型
+     * @doc 配置
+     */
+    public static void config(String dnsType) throws InterruptedException {
         DNS_TYPE = dnsType;
         speeed = System.currentTimeMillis();
         init();
     }
 
+    public static void main(String[] args) throws InterruptedException {
+        config(ADDRESSV4);
+    }
 
+
+    /**
+     * @author kewei
+     * @date 2023/02/03
+     * @params
+     * @doc 写入hosts文件
+     */
     private final static void writeHost(){
 
         File file = new File("C:\\Windows\\System32\\drivers\\etc\\hosts");
         //write
         try {
+            System.out.println("开始写入hosts");
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), CharsetUtil.CHARSET_UTF_8));
             writer.write(content.toString());
             writer.flush();
             writer.close();
+            System.out.println("写入hosts完成");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         //flushdns
         try {
+            System.out.println("开始刷新DNS");
             Runtime.getRuntime().exec("ipconfig /flushdns");
+            System.out.println("刷新DNS完成");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
+    /**
+     * @author kewei
+     * @date 2023/02/03
+     * @params @param domain 域
+     * @doc 获取ip
+     */
     public static String getIP(String domain){
         String ip = "";
         try {
@@ -169,6 +303,12 @@ public class GitHubHost {
         return ip;
     }
 
+    /**
+     * @author kewei
+     * @date 2023/02/03
+     * @params @param domain 域
+     * @doc 通过MYSSL 获取domain的ip
+     */
     private final static String getIpforMyssl(String domain){
         String url = MYSSL+domain;
         queryCount++;
@@ -216,6 +356,12 @@ public class GitHubHost {
     }
 
 
+    /**
+     * @author kewei
+     * @date 2023/02/03
+     * @params @param domain 域
+     * @doc 通过ipaddress 获取domain的ip
+     */
     private final static String getIpforIpaddressV4(String domain){
         queryCount++;
         System.out.println(StrUtil.format("正在 查询{}DNS \n",domain));
@@ -252,7 +398,12 @@ public class GitHubHost {
         return "## 连接耗时" +speed.getLong("speed") + "\n" +speed.getString("value") ;
     }
 
-
+    /**
+     * @author kewei
+     * @date 2023/02/03
+     * @params @param domain 域
+     * @doc 通过ipaddress 获取domain的ipv6
+     */
     private final static String getIpforIpaddressV6(String domain){
         queryCount++;
         System.out.println(StrUtil.format("正在 查询{}DNS \n",domain));
@@ -278,6 +429,12 @@ public class GitHubHost {
         return "## 连接耗时" +speed.getLong("speed") + "\n" +speed.getString("value") ;
     }
 
+    /**
+     * @author kewei
+     * @date 2023/02/03
+     * @params @param domain 域
+     * @doc ip连接速度
+     */
     public final static Long getSpeed(String ipAddress) {
         System.out.println(StrUtil.format("正在 测试{} 连接速度 \n",ipAddress));
         Long ipSpeeed  = System.currentTimeMillis();

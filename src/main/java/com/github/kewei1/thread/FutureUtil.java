@@ -32,24 +32,6 @@ public class FutureUtil {
     }
 
 
-
-
-    public static void main(String[] args) {
-
-        for (int i = 0; i < 100; i++) {
-
-            synchronizeExecute(2, TimeUnit.HOURS,()->{
-                System.out.println("执行"+Thread.currentThread().getName());
-
-                return null;
-            });
-        }
-
-
-        executorService.shutdown();
-
-    }
-
     public static void shutdown(){
         executorService.shutdown();
     }
