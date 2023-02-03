@@ -20,104 +20,89 @@ import java.util.stream.Stream;
 
 /**
  * @author kewei
- * @date 2023/02/03
- * @doc github hosts 配置<br>
+ * @return github hosts 配置<br>
  *  1.获取原始hosts文件 <br>
  *  2.获取github hosts信息<br>
  *  3.合并hosts文件<br>
  *  4.写入hosts文件<br>
  *  5.刷新dns缓存<br>
+ * @since 2023/02/03
  */
 public class GitHubHost {
 
     /**
-     * @doc 需要配置host的域名
-     * @see @see Set<String>
+     * @return 需要配置host的域名
      */
     private static Set<String>  HOSTS =  new HashSet<>();
     /**
-     * @doc host内容
-     * @see @see StringBuilder
+     * @return host内容
      */
     private static StringBuilder content = new StringBuilder();
 
 
-
     /**
-     * @doc ping超时信息统计
-     * @see
+     * @return ping超时信息统计
      */
     private static int overtimePing = 0;
     /**
-     * @doc ping成功信息统计
-     * @see
+     * @return ping成功信息统计
      */
     private static int successPing = 0;
     /**
-     * @doc ping成功数统计
-     * @see
+     * @return ping成功数统计
      */
     private static int successCount = 0;
     /**
-     * @doc ping总数统计
-     * @see
+     * @return ping总数统计
      */
     private static int pingCount = 0;
     /**
-     * @doc DNS查询统计
-     * @see
+     * @return DNS查询统计
      */
     private static int queryCount = 0;
 
     /**
-     * @doc 程序运行时间
-     * @see @see Long
+     * @return 程序运行时间
      */
     private static  Long speeed = 0L;
 
 
     /**
-     * @doc MySSL DNS查询
-     * @see @see String
+     * @return MySSL DNS查询
      */
     public static final String MYSSL = "https://myssl.com/api/v1/tools/dns_query?qtype=1&qmode=-1&host=";
 
     /**
-     * @doc AddressV4 DNS查询
-     * @see @see String
+     * @return AddressV4 DNS查询
      */
     public static final String ADDRESSV4 = "https://www.ipaddress.com/site/";
     /**
-     * @doc AddressV6 DNS查询
-     * @see @see String
+     * @return AddressV6 DNS查询
      */
     private static final String ADDRESSV6 = "https://www.ipaddress.com/site/";
 
 
     /**
-     * @doc 传入 dns类型
-     * @see @see String
+     * @return 传入 dns类型
      */
     private static  String DNS_TYPE = "";
 
     /**
-     * @doc IPV4正则
-     * @see @see String
+     * @return IPV4正则
      */
     private final static String IPV4 = "((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}";
 
     /**
-     * @doc IPV6正则
-     * @see @see String
+     * @return IPV6正则
      */
     private final static String IPV6 ="((?:[\\da-fA-F]{0,4}:[\\da-fA-F]{0,4}){2,7})(?:[\\/\\\\%](\\d{1,3}))?";
 
 
     /**
+     * @param
+     * @return 初始化
      * @author kewei
-     * @date 2023/02/03
-     * @params
-     * @doc 初始化
+     * @since 2023/02/03
      */
     private final static void  init() throws InterruptedException {
 
@@ -175,10 +160,10 @@ public class GitHubHost {
     }
 
     /**
+     * @param
+     * @return 设置hosts文件
      * @author kewei
-     * @date 2023/02/03
-     * @params
-     * @doc 设置hosts文件
+     * @since 2023/02/03
      */
     private static void setHOSTS() {
         HOSTS.add("github.com");
@@ -221,10 +206,10 @@ public class GitHubHost {
 
 
     /**
+     * @param
+     * @return 保存hosts文件
      * @author kewei
-     * @date 2023/02/03
-     * @params
-     * @doc 保存hosts文件
+     * @since 2023/02/03
      */
     private static void saveHOSTS() {
         writeHost();
@@ -239,10 +224,10 @@ public class GitHubHost {
     }
 
     /**
+     * @param @param dnsType dns类型
+     * @return dnsType dns类型
      * @author kewei
-     * @date 2023/02/03
-     * @params @param dnsType dns类型
-     * @doc 配置
+     * @since 2023/02/03
      */
     public static void config(String dnsType) throws InterruptedException {
         DNS_TYPE = dnsType;
@@ -256,10 +241,10 @@ public class GitHubHost {
 
 
     /**
+     * @param
+     * @return 写入hosts文件
      * @author kewei
-     * @date 2023/02/03
-     * @params
-     * @doc 写入hosts文件
+     * @since 2023/02/03
      */
     private final static void writeHost(){
 
@@ -288,10 +273,10 @@ public class GitHubHost {
     }
 
     /**
+     * @param @param domain 域
+     * @return 获取ip
      * @author kewei
-     * @date 2023/02/03
-     * @params @param domain 域
-     * @doc 获取ip
+     * @since 2023/02/03
      */
     public static String getIP(String domain){
         String ip = "";
@@ -304,10 +289,10 @@ public class GitHubHost {
     }
 
     /**
+     * @param @param domain 域
+     * @return 通过MYSSL 获取domain的ip
      * @author kewei
-     * @date 2023/02/03
-     * @params @param domain 域
-     * @doc 通过MYSSL 获取domain的ip
+     * @since 2023/02/03
      */
     private final static String getIpforMyssl(String domain){
         String url = MYSSL+domain;
@@ -357,10 +342,10 @@ public class GitHubHost {
 
 
     /**
+     * @param @param domain 域
+     * @return 通过ipaddress 获取domain的ip
      * @author kewei
-     * @date 2023/02/03
-     * @params @param domain 域
-     * @doc 通过ipaddress 获取domain的ip
+     * @since 2023/02/03
      */
     private final static String getIpforIpaddressV4(String domain){
         queryCount++;
@@ -399,10 +384,10 @@ public class GitHubHost {
     }
 
     /**
+     * @param @param domain 域
+     * @return 通过ipaddress 获取domain的ipv6
      * @author kewei
-     * @date 2023/02/03
-     * @params @param domain 域
-     * @doc 通过ipaddress 获取domain的ipv6
+     * @since 2023/02/03
      */
     private final static String getIpforIpaddressV6(String domain){
         queryCount++;
@@ -430,10 +415,10 @@ public class GitHubHost {
     }
 
     /**
+     * @param @param ipAddress ip地址
+     * @return ip连接速度 毫秒为单位
      * @author kewei
-     * @date 2023/02/03
-     * @params @param domain 域
-     * @doc ip连接速度
+     * @since 2023/02/03
      */
     public final static Long getSpeed(String ipAddress) {
         System.out.println(StrUtil.format("正在 测试{} 连接速度 \n",ipAddress));
