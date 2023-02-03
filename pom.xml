@@ -8,7 +8,7 @@
 
   <groupId>io.github.kewei1</groupId>
   <artifactId>WeiTool</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
 
   <build>
     <finalName>WeiTool</finalName>
