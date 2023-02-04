@@ -1,10 +1,10 @@
-package main.java.com.github.kewei1.Jenkins;
+package com.github.kewei1.Jenkins;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import main.java.com.github.kewei1.xxlJob.XxlJobUtils;
+import com.github.kewei1.xxlJob.XxlJobUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -55,14 +55,43 @@ import java.util.stream.Collectors;
 
 public class JenkinsUtils {
 
+    /**
+     * @since 2023/02/03
+     * 后缀
+     */
     private final  static String SUFFIX="/api/json";
+    /**
+     * @since 2023/02/03
+     * job
+     */
     private final  static String JOB="/job/";
 
+    /**
+     * @since 2023/02/03
+     * 基础url
+     */
     private static String BASE_URL="";
+    /**
+     * @since 2023/02/03
+     * JENKINS令牌
+     */
     private static String JENKINS_TOKEN = "";
+    /**
+     * @since 2023/02/03
+     * JENKINS用户名
+     */
     private static String JENKINS_USERNAME = "";
 
 
+    /**
+     * JENKINS配置
+     *
+     * @param url      url
+     * @param token    令牌
+     * @param username 用户名
+     * @author kewei
+     * @since 2023/02/03
+     */
     public  JenkinsUtils(String url,String token,String username){
         BASE_URL = url;
         JENKINS_TOKEN = token;
@@ -70,7 +99,14 @@ public class JenkinsUtils {
     }
 
 
-
+    /**
+     * 自定义http请求
+     *
+     * @param url         url
+     * @param httpRequest http请求
+     * @author kewei
+     * @since 2023/02/03
+     */
     public  String customHttpMsg(String url, HttpRequest httpRequest) throws Exception {
         URI uri = new URI(url);
 
@@ -90,6 +126,12 @@ public class JenkinsUtils {
         }
     }
 
+    /**
+     * 获取所有的job信息
+     *
+     * @author kewei
+     * @since 2023/02/03
+     */
     public    JSONArray getJobs()  {
         String JENKINS_URL =BASE_URL+SUFFIX;
         HttpPost httpPost = new HttpPost(JENKINS_URL);
@@ -103,6 +145,13 @@ public class JenkinsUtils {
         return parse.getJSONArray("jobs");
     }
 
+    /**
+     * 获取job的构建信息
+     *
+     * @param job job信息
+     * @author kewei
+     * @since 2023/02/03
+     */
     public   JSONArray getNumbers(String job) {
         String JENKINS_URL =BASE_URL+JOB+job+SUFFIX;
         HttpPost httpPost = new HttpPost(JENKINS_URL);
@@ -116,6 +165,14 @@ public class JenkinsUtils {
         return parse.getJSONArray("builds");
     }
 
+    /**
+     * 获取构建信息
+     *
+     * @param job   工作
+     * @param build 构建
+     * @author kewei
+     * @since 2023/02/03
+     */
     public   JSONObject getBuild(String job,String build)  {
         String JENKINS_URL =BASE_URL+JOB+job+"/"+build+SUFFIX;
         HttpPost httpPost = new HttpPost(JENKINS_URL);

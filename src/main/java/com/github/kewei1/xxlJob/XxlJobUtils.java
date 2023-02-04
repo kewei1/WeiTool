@@ -1,4 +1,4 @@
-package main.java.com.github.kewei1.xxlJob;
+package com.github.kewei1.xxlJob;
 
 
 
