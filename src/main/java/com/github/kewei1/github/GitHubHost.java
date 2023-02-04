@@ -4,6 +4,8 @@ import cn.hutool.core.stream.StreamUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.log.Log;
+import cn.hutool.log.LogFactory;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -31,6 +33,12 @@ import java.util.stream.Stream;
 public class GitHubHost {
 
     /**
+     * @since 2023/02/04
+     * 日志
+     */
+    private static final Log log = LogFactory.get();
+
+    /**
      *  需要配置host的域名
      */
     private static Set<String>  HOSTS =  new HashSet<>();
@@ -43,28 +51,28 @@ public class GitHubHost {
     /**
      *  ping超时信息统计
      */
-    private static int overtimePing = 0;
+    private static volatile  int overtimePing = 0;
     /**
      *  ping成功信息统计
      */
-    private static int successPing = 0;
+    private static volatile   int successPing = 0;
     /**
      *  ping成功数统计
      */
-    private static int successCount = 0;
+    private static volatile  int successCount = 0;
     /**
      *  ping总数统计
      */
-    private static int pingCount = 0;
+    private static volatile  int pingCount = 0;
     /**
      *  DNS查询统计
      */
-    private static int queryCount = 0;
+    private static volatile  int queryCount = 0;
 
     /**
      *  程序运行时间
      */
-    private static  Long speeed = 0L;
+    private static  volatile Long speeed = 0L;
 
 
     /**
@@ -108,22 +116,22 @@ public class GitHubHost {
 
         setHOSTS();
 
-        System.out.println("获取原始hosts文件");
+        log.info("获取原始hosts文件");
         File file = new File("C:\\Windows\\System32\\drivers\\etc\\hosts");
         Stream<String> of1 = StreamUtil.of(file, CharsetUtil.CHARSET_UTF_8);
-        System.out.println("获取原始hosts文件成功");
+        log.info("获取原始hosts文件成功");
 
-        System.out.println("开始处理hosts文件 非github DNS 保留");
+        log.info("开始处理hosts文件 非github DNS 保留");
         content.append("## 非github DNS").append("\n");
         of1.forEachOrdered(e -> {
             if (null!=e && !e.equals("") && e.length()>0 && !e.contains("github") &&  !e.startsWith("#")){
                 content.append(e).append("\n");
             }
         });
-        System.out.println("处理hosts文件 非github DNS 保留成功");
+        log.info("处理hosts文件 非github DNS 保留成功");
 
 
-        System.out.println("开始处理hosts文件 github DNS");
+        log.info("开始处理hosts文件 github DNS");
         content.append("\n\n\n\n## github DNS").append("\n");
         final int threadSize = HOSTS.size();
         final CountDownLatch countDownLatch = new CountDownLatch(threadSize);
@@ -154,7 +162,7 @@ public class GitHubHost {
             });
         });
         countDownLatch.await();
-        System.out.println("处理hosts文件 github DNS 成功");
+        log.info("处理hosts文件 github DNS 成功");
         executorService.shutdown();
         saveHOSTS();
     }
@@ -213,14 +221,14 @@ public class GitHubHost {
      */
     private static void saveHOSTS() {
         writeHost();
-        System.out.println(StrUtil.format("获取{}次DNS记录",queryCount));
-        System.out.println(StrUtil.format("测速{}次",pingCount));
-        System.out.println(StrUtil.format("成功{}次",successPing));
-        System.out.println(StrUtil.format("超时{}次",overtimePing));
-        System.out.println(StrUtil.format("配置成功{}条DNS记录\n",successCount));
-        System.out.println(StrUtil.format("执行耗时{}秒",(System.currentTimeMillis() -speeed)/1000));
-        System.out.println("配置完成");
-        System.out.println("请重启浏览器");
+        log.info(StrUtil.format("获取{}次DNS记录",queryCount));
+        log.info(StrUtil.format("测速{}次",pingCount));
+        log.info(StrUtil.format("成功{}次",successPing));
+        log.info(StrUtil.format("超时{}次",overtimePing));
+        log.info(StrUtil.format("配置成功{}条DNS记录\n",successCount));
+        log.info(StrUtil.format("执行耗时{}秒",(System.currentTimeMillis() -speeed)/1000));
+        log.info("配置完成");
+        log.info("请重启浏览器");
     }
 
     /**
@@ -236,7 +244,8 @@ public class GitHubHost {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        config(ADDRESSV4);
+        config(MYSSL);
+//        config(ADDRESSV4);
     }
 
 
@@ -251,21 +260,21 @@ public class GitHubHost {
         File file = new File("C:\\Windows\\System32\\drivers\\etc\\hosts");
         //write
         try {
-            System.out.println("开始写入hosts");
+            log.info("开始写入hosts");
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), CharsetUtil.CHARSET_UTF_8));
             writer.write(content.toString());
             writer.flush();
             writer.close();
-            System.out.println("写入hosts完成");
+            log.info("写入hosts完成");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         //flushdns
         try {
-            System.out.println("开始刷新DNS");
+            log.info("开始刷新DNS");
             Runtime.getRuntime().exec("ipconfig /flushdns");
-            System.out.println("刷新DNS完成");
+            log.info("刷新DNS完成");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -297,13 +306,13 @@ public class GitHubHost {
     private final static String getIpforMyssl(String domain){
         String url = MYSSL+domain;
         queryCount++;
-        System.out.println(StrUtil.format("正在 查询{}DNS \n",domain));
+        log.info(StrUtil.format("正在 查询{}DNS \n",domain));
         String result = HttpUtil.get(url);
         JSONObject jsonObject = JSONObject.parseObject(result);
         JSONObject data = jsonObject.getJSONObject("data");
 
         if (null == data){
-            System.out.println(StrUtil.format("查询{}DNS 失败 \n",domain));
+            log.info(StrUtil.format("查询{}DNS 失败 \n",domain));
            //暂停 5秒
             try {
                 TimeUnit.SECONDS.sleep(5);
@@ -313,7 +322,7 @@ public class GitHubHost {
             return getIpforMyssl(domain);
         }
 
-        System.out.println(StrUtil.format("查询{}DNS 成功 \n",domain));
+        log.info(StrUtil.format("查询{}DNS 成功 \n",domain));
 
 
         List<JSONObject> list = new ArrayList<>();
@@ -349,7 +358,7 @@ public class GitHubHost {
      */
     private final static String getIpforIpaddressV4(String domain){
         queryCount++;
-        System.out.println(StrUtil.format("正在 查询{}DNS \n",domain));
+        log.info(StrUtil.format("正在 查询{}DNS \n",domain));
         String result ="";
         try {
              result = HttpUtil.get(ADDRESSV4+domain);
@@ -358,7 +367,7 @@ public class GitHubHost {
         }
 
 
-        System.out.println(StrUtil.format("查询{}DNS 成功 \n",domain));
+        log.info(StrUtil.format("查询{}DNS 成功 \n",domain));
 
         String[] ipv4 = result.split("https://www.ipaddress.com/ipv4/");
 
@@ -391,9 +400,9 @@ public class GitHubHost {
      */
     private final static String getIpforIpaddressV6(String domain){
         queryCount++;
-        System.out.println(StrUtil.format("正在 查询{}DNS \n",domain));
+        log.info(StrUtil.format("正在 查询{}DNS \n",domain));
         String result = HttpUtil.get(ADDRESSV6+domain);
-        System.out.println(StrUtil.format("查询{}DNS 成功 \n",domain));
+        log.info(StrUtil.format("查询{}DNS 成功 \n",domain));
 
         String[] ipv6 = result.split("https://www.ipaddress.com/ipv6/");
 
@@ -420,19 +429,19 @@ public class GitHubHost {
      * @author kewei
      * @since 2023/02/03
      */
-    public final static Long getSpeed(String ipAddress) {
-        System.out.println(StrUtil.format("正在 测试{} 连接速度 \n",ipAddress));
+    public final static synchronized  Long getSpeed(String ipAddress) {
+        log.info(StrUtil.format("正在 测试{} 连接速度 \n",ipAddress));
         Long ipSpeeed  = System.currentTimeMillis();
         try{
             pingCount++;
             HttpUtil.get(ipAddress,3000);
         }catch (Exception e){
-            System.out.println(StrUtil.format("测试{} 连接速度 超时 \n",ipAddress));
+            log.info(StrUtil.format("测试{} 连接速度 超时 \n",ipAddress));
             overtimePing++;
             return 999999999999999999L;
         }
         successPing++;
-        System.out.println(StrUtil.format("测试{} 连接速度 成功 速度为{}毫秒 \n",ipAddress,System.currentTimeMillis() - ipSpeeed));
+        log.info(StrUtil.format("测试{} 连接速度 成功 速度为{}毫秒 \n",ipAddress,System.currentTimeMillis() - ipSpeeed));
         return System.currentTimeMillis() - ipSpeeed;
     }
 
