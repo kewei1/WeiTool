@@ -8,7 +8,6 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.log.GlobalLogFactory;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
-import com.github.kewei1.log.WeiLog;
 import com.google.common.util.concurrent.Futures;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
