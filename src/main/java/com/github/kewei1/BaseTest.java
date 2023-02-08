@@ -15,13 +15,12 @@ public class BaseTest {
 
     @Before
     public void before() throws Exception{
-        log.info("测试开始");
-
+        log.info("-----------------测试开始-----------------");
     }
 
     @After
     public void after() throws Exception{
-        log.info("测试结束");
+        log.info("-----------------测试结束-----------------");
     }
 
 }
