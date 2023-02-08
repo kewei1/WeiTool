@@ -1,6 +1,7 @@
-package com.github.kewei1.test;
+package com.github.kewei1.commons;
 
-import com.alibaba.fastjson.parser.Feature;
+import cn.hutool.log.Log;
+import cn.hutool.log.LogFactory;
 import com.github.kewei1.HuStringUtils;
 import com.github.kewei1.thread.FutureUtil;
 
@@ -15,97 +16,179 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 
-public class Test {
+public class FileClass {
 
-    private static  List<String> files = new ArrayList<String>();
-    private static  List<String> ends = new ArrayList<String>();
+    public static final Log log = LogFactory.get();
 
-    private static Integer count = 0;
+    /**
+     * @since 2023/02/08
+     * 扫描文件后缀
+     */
+    private static  List<String> SUFFIX = new ArrayList<String>();
 
+    /**
+     * @since 2023/02/08
+     * 正则表达式 中文
+     */
+    private static String REGEX_CHINESE = "[\u4e00-\u9fa5]";
+
+    /**
+     * @since 2023/02/08
+     * 存放路径
+     */
     private static String path = "D:\\File\\分类\\";
 
+    public static boolean addSUFFIX(String suffix){
+        return SUFFIX.add(suffix);
+    }
+
+    public static void setPath(String pa){
+        path = pa;
+    }
 
 
 
-    public static void main(String[] args) throws Exception {
-        ends.add("pdf");
-        ends.add("doc");
-        ends.add("docx");
-        ends.add("xls");
-        ends.add("xlsx");
-        ends.add("ppt");
-        ends.add("pptx");
-        ends.add("txt");
+    /**
+     * @since 2023/02/08
+     * 扫描统计
+     */
+    private static Integer count = 0;
+    private static Integer copyCount = 0;
 
-//        ends.add("jpg");
-//        ends.add("jpeg");
-//        ends.add("png");
-//        ends.add("gif");
-//        ends.add("bmp");
-//        ends.add("ico");
-//        ends.add("svg");
-//
-//        ends.add("mp3");
-//        ends.add("wav");
-//        ends.add("wma");
-//        ends.add("ogg");
-//        ends.add("ape");
-//
-//        ends.add("mp4");
-//        ends.add("avi");
-//        ends.add("rmvb");
-//        ends.add("rm");
-//        ends.add("flv");
-//        ends.add("wmv");
+
+    private static Integer taskCount = -1;
+    private static Integer completedTaskCount = 0;
+
+    private static Long startRunTime = 0L;
 
 
 
+    private static void await(){
 
-        ends.stream().forEach(e->{
+
+        if (taskCount.equals(completedTaskCount)){
+            FutureUtil.executorCount("任务完成");
+            FutureUtil.shutdown();
+            log.info("耗时："+(System.currentTimeMillis()-startRunTime)/1000+"秒");
+            return;
+        }
+
+
+
+        if (taskCount.equals(FutureUtil.getTaskCount()) && completedTaskCount.equals(FutureUtil.getCompletedTaskCount())){
+            FutureUtil.executorCount("任务完成");
+
+            FutureUtil.shutdown();
+            FutureUtil.executorCount("任务完成");
+            log.info("耗时："+((System.currentTimeMillis()-startRunTime)/1000 - 20) +"秒");
+            return;
+        }
+
+        taskCount = FutureUtil.getTaskCount();
+        completedTaskCount = FutureUtil.getCompletedTaskCount();
+
+
+        if (taskCount > completedTaskCount){
+            FutureUtil.executorCount("任务完成");
+            try {
+                Thread.sleep(20000);
+                await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+    }
+
+
+
+
+
+
+
+    static {
+        log.info("初始化");
+        startRunTime = System.currentTimeMillis();
+        init();
+
+    }
+
+    /**
+     * 初始化
+     *
+     * @author kewei
+     * @since 2023/02/08
+     */
+    private static void init(){
+        
+        FutureUtil.doRrnnable(()->{
+            await();
+        });
+
+        SUFFIX.add("pdf");
+        SUFFIX.add("doc");
+        SUFFIX.add("docx");
+        SUFFIX.add("xls");
+        SUFFIX.add("xlsx");
+        SUFFIX.add("ppt");
+        SUFFIX.add("pptx");
+        SUFFIX.add("txt");
+
+        SUFFIX.stream().forEach(e->{
             String dirStr = path+e.toString();
             File directory = new File(dirStr);
             if (!directory.exists()) {
                 directory.mkdirs();
             }
         });
-
-
-//        ends.add(".txt");
-//        ends.add(".rar");
-//        ends.add(".zip");
-//        ends.add(".7z");
-//        deleteChina("C:\\Users\\15400\\Documents");
-//        deleteChina("D:\\");
-        deleteChina();
     }
 
 
-    private static String REGEX_CHINESE = "[\u4e00-\u9fa5]";
 
-    public static void deleteChina(){
-        deleteChina(null);
-        FutureUtil.shutdown();
+
+
+
+    public static void main(String[] args) throws Exception {
+        fileClass();
     }
 
-    public static void deleteChina(String fileLocation) {
-        count++;
-        System.out.println(count);
+
+    /**
+     * 文件分类
+     *
+     * @author kewei
+     * @since 2023/02/08
+     */
+    public static void fileClass(){
+        fileClass(null);
+    }
+
+    /**
+     * 文件分类
+     *
+     * @param fileLocation 文件位置
+     * @author kewei
+     * @since 2023/02/08
+     */
+    public static void fileClass(String fileLocation) {
+
+        log.info("第{}次执行",count++);
 
             File file;
+
             if (!HuStringUtils.isEmpty(fileLocation)){
                 file = new File(fileLocation);
             }else {
                 file = null;
+                //获取磁盘分区列表
                 File[] parts =File.listRoots();
-
                 Arrays.stream(parts).forEach(e->{
-                    ArrayList<String> dir = Dir(new File(e.toString()));
+                    ArrayList<String> dir = getDir(new File(e.toString()));
+
                     dir.stream().forEach(f->{
-                        deleteChina(f);
+                        fileClass(f);
                     });
                 });
             }
@@ -113,25 +196,26 @@ public class Test {
             if (null!=file &&file.exists()) {
 
                 if (file.isDirectory() && !path.equals(fileLocation)) {
-                    System.out.print("--文件夹");
-                    System.out.println(fileLocation);
-                    ArrayList<String> dir = Dir(new File(fileLocation));
 
-                    FutureUtil.synchronizeExecute(2, TimeUnit.HOURS,()->{
-                        System.out.println("执行"+Thread.currentThread().getName());
+                    log.info("文件夹"+fileLocation);
+
+                    ArrayList<String> dir = getDir(new File(fileLocation));
+
+                    FutureUtil.doRrnnable(()->{
+
+                        log.info("执行"+Thread.currentThread().getName());
+
                         dir.stream().forEach(e->{
-                            deleteChina(e);
+                            fileClass(e);
                         });
-                        return null;
                     });
 
                 } else {
-                    System.out.print("--文件");
-                    System.out.println(fileLocation);
 
-                    ends.forEach(e->{
+                    log.info("文件"+fileLocation);
+
+                    SUFFIX.forEach(e->{
                         if (fileLocation.endsWith(e)){
-                            file.getName();
 
                             String lastAccessTime = getLastAccessTime(file);
 
@@ -147,45 +231,31 @@ public class Test {
 
                             try {
                                 copyFile(file, copyFile);
-                                count++;
                             } catch (IOException ex) {
                                 throw new RuntimeException(ex);
                             }
-                            files.add(fileLocation);
-                            System.out.println(Thread.currentThread().getName());
+
                         }
                     });
 
-
-//                Stream<String> of1 = StreamUtil.of(file, CharsetUtil.CHARSET_UTF_8);
-//                StringBuilder content = new StringBuilder();
-//
-//                of1.forEachOrdered(e->{
-//                    content.append(e.replaceAll(REGEX_CHINESE,"")).append("\n");
-//                });
-//
-//                BufferedWriter out = null;
-//                try {
-//                    out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
-//                    String target = content.toString();
-//                    out.write(target);
-//                    out.flush();
-//                    out.close();
-//                } catch (Exception e) {
-//                }finally {
-//                }
                 }
             }
-
-//            return null;
-
 
 
     }
 
 
-
+    /**
+     * 复制文件
+     *
+     * @param source 源
+     * @param dest   桌子
+     * @author kewei
+     * @since 2023/02/08
+     */
     private static void copyFile(File source, File dest) throws IOException {
+        Integer integer = copyCount++;
+        log.info("开始整理第{}个文件",integer);
         if (!dest.exists()) {
             FileChannel inputChannel = null;
             FileChannel outputChannel = null;
@@ -194,16 +264,23 @@ public class Test {
                 outputChannel = new FileOutputStream(dest).getChannel();
                 outputChannel.transferFrom(inputChannel, 0, inputChannel.size());
             } finally {
+                log.info("整理{}    整理完成第{}个文件   {}整理中",copyCount,integer,copyCount-integer);
                 inputChannel.close();
                 outputChannel.close();
             }
         }
+
     }
 
 
-
-
-    public static ArrayList<String> Dir(File dirFile)  {
+    /**
+     * 获取 文件夹下的所有文件
+     *
+     * @param dirFile dir文件
+     * @author kewei
+     * @since 2023/02/08
+     */
+    public static ArrayList<String> getDir(File dirFile)  {
         ArrayList<String> dirStrArr = new ArrayList<String>();
 
         if (dirFile.exists()) {
@@ -227,72 +304,13 @@ public class Test {
 
 
 
-//
-
-    // ----------------------------------------------------------------
-
-
-
-    static Pattern pattern = Pattern.compile("(\r\n)*", Pattern.DOTALL);
-
     /**
-     * 里德文件
+     * 得到创建时间
      *
      * @param file 文件
-     * @throws IOException ioexception
+     * @author kewei
+     * @since 2023/02/08
      */
-    public static void readeFile(File file) throws IOException {
-        if(file.exists()){
-            for(File fileson : file.listFiles()){
-                if(fileson.isFile()){
-                    //对java文件逐行读取修改注释
-                    BufferedReader reader = null;
-                    try {
-                        reader = new BufferedReader(new FileReader(fileson));
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    StringBuilder content = new StringBuilder();
-                    String tmp = null;
-                    while ((tmp = reader.readLine()) != null) {
-                        if(tmp.indexOf("//") >= 0){
-                            tmp = tmp.replace(tmp.substring(tmp.indexOf("//"),tmp.length()),"");
-                        }
-                        //删除已空格开始，以空格结尾的行
-                        if(tmp.matches("^\t+$")){
-                            continue;
-                        }
-
-                        //删除空行
-                        tmp = tmp.replaceAll("((\r\n)|\n)[\\s\t ]*(\\1)+", "$1");
-                        if("".equals(tmp) || null == tmp || "\t".equals(tmp) || "".equals(tmp.trim())){
-                            continue;
-                        }
-                        content.append(tmp);
-                        content.append("\n");
-                    }
-                    String target = content.toString();
-                    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileson)));
-                    out.write(target);
-                    out.flush();
-                    out.close();
-                } else {
-                    System.out.println(fileson.getName());
-                    readeFile(fileson);
-                }
-            }
-        }
-    }
-
-
-
-
-
-
-
-
-
-
     public static String getCreationTime(File file) {
         if (file == null) {
             return null;
@@ -312,6 +330,13 @@ public class Test {
     }
 
 
+    /**
+     * 得到最后访问时间
+     *
+     * @param file 文件
+     * @author kewei
+     * @since 2023/02/08
+     */
     public static String getLastAccessTime(File file) {
         if (file == null) {
             return null;
@@ -331,6 +356,13 @@ public class Test {
     }
 
 
+    /**
+     * 得到最后修改时间
+     *
+     * @param file 文件
+     * @author kewei
+     * @since 2023/02/08
+     */
     public static String getLastModifiedTime(File file) {
         if (file == null) {
             return null;

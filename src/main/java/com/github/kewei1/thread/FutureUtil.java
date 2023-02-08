@@ -3,6 +3,7 @@ package com.github.kewei1.thread;
 
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import org.junit.Test;
 
 import java.util.concurrent.*;
 import java.util.function.*;
@@ -12,6 +13,71 @@ public class FutureUtil {
     private static final Log log = LogFactory.get();
 
     private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors()*8, Runtime.getRuntime().availableProcessors()*8, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
+
+
+    public static void shutdown(){
+        executor.shutdown();
+    }
+
+
+
+
+    public static void shutdownNow(){
+        executor.shutdownNow();
+    }
+
+    /**
+     * 线程池状态
+     *
+     * @param name 名字
+     * @author kewei
+     * @since 2023/02/08
+     */
+    public static void executorStatus(String name){
+        log.info(name+"线程池状态" + executor.isShutdown());
+        log.info(name+"线程池状态" + executor.isTerminated());
+        log.info(name+"线程池状态" + executor.isTerminating());
+    }
+
+
+    /**
+     * 得到完成任务数
+     *
+     * @author kewei
+     * @since 2023/02/08
+     */
+    public static Integer getCompletedTaskCount(){
+        return Math.toIntExact(executor.getCompletedTaskCount());
+    }
+
+
+
+    /**
+     * 得到任务数
+     *
+     * @author kewei
+     * @since 2023/02/08
+     */
+    public static Integer getTaskCount(){
+        return Math.toIntExact(executor.getTaskCount());
+    }
+
+    /**
+     * 得到活动线程数
+     *
+     * @author kewei
+     * @since 2023/02/08
+     */
+    public static Integer getActiveCount(){
+        return executor.getActiveCount();
+    }
+
+
+
+
+
+
 
 
     public static void executorCount(String name){
