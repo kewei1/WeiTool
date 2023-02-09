@@ -15,14 +15,23 @@ public class FutureUtil {
     private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors()*8, Runtime.getRuntime().availableProcessors()*8, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
 
-
+    /**
+     * 关闭
+     *
+     * @author kewei
+     * @since 2023/02/08
+     */
     public static void shutdown(){
         executor.shutdown();
     }
 
 
-
-
+    /**
+     * 关闭现在
+     *
+     * @author kewei
+     * @since 2023/02/08
+     */
     public static void shutdownNow(){
         executor.shutdownNow();
     }
@@ -46,6 +55,7 @@ public class FutureUtil {
      *
      * @author kewei
      * @since 2023/02/08
+     * @return 完成任务数
      */
     public static Integer getCompletedTaskCount(){
         return Math.toIntExact(executor.getCompletedTaskCount());
@@ -58,6 +68,7 @@ public class FutureUtil {
      *
      * @author kewei
      * @since 2023/02/08
+     * @return 任务数
      */
     public static Integer getTaskCount(){
         return Math.toIntExact(executor.getTaskCount());
@@ -68,18 +79,20 @@ public class FutureUtil {
      *
      * @author kewei
      * @since 2023/02/08
+     * @return 活动线程数
      */
     public static Integer getActiveCount(){
         return executor.getActiveCount();
     }
 
 
-
-
-
-
-
-
+    /**
+     * 线程统计
+     *
+     * @param name 名字
+     * @author kewei
+     * @since 2023/02/08
+     */
     public static void executorCount(String name){
         log.info(name+"活动线程数" + executor.getActiveCount());
         log.info(name+"任务数" + executor.getTaskCount());
@@ -92,7 +105,7 @@ public class FutureUtil {
 
     /**
      * 异步执行<br>
-     *     public static Runnable runnable = () -> {<br>
+     *     public static Runnable runnable = () - {<br>
      *         System.out.println("执行");<br>
      *     };<br>
      * 调用方式<br>
@@ -115,7 +128,7 @@ public class FutureUtil {
 
     /**
      * 异步执行<br>
-     *     public static Callable callable = () -> {<br>
+     *     public static Callable callable = () - {<br>
      *         System.out.println("执行");<br>
      *         return "执行";<br>
      *     };<br>
@@ -140,11 +153,11 @@ public class FutureUtil {
 
     /**
      * 异步执行 消费<br>
-     *    public static Consumer consumer = (x) -> { <br>
+     *    public static Consumer consumer = (x) - { <br>
      *     System.out.println("执行"+x);<br>
      *     };<br>
      * 调用方式<br>
-     *     doConsumer((x) -> {<br>
+     *     doConsumer((x) - {<br>
      *     System.out.println("执行"+x);<br>
      *     });<br>
      *
@@ -165,12 +178,12 @@ public class FutureUtil {
 
 /**
      * 异步执行 供给<br>
-     *     public static Supplier supplier = () -> {<br>
+     *     public static Supplier supplier = () - {<br>
      *         System.out.println("执行");<br>
      *         return "执行";<br>
      *     };<br>
      * 调用方式<br>
-     *     doSupplier(() -> {<br>
+     *     doSupplier(() - {<br>
      *         System.out.println("执行");<br>
      *         return "执行";<br>
      *     });<br>
@@ -195,12 +208,12 @@ public class FutureUtil {
 
     /**
      * 异步执行 函数<br>
-     *     public static Function function = (x) -> {<br>
+     *     public static Function function = (x) - {<br>
      *         System.out.println("执行"+x);<br>
      *         return "执行";<br>
      *     };<br>
      * 调用方式<br>
-     *     doFunction((x) -> {<br>
+     *     doFunction((x) - {<br>
      *         System.out.println("执行"+x);<br>
      *         return "执行";<br>
      *     });<br>
@@ -223,15 +236,15 @@ public class FutureUtil {
 
     /**
      * 异步执行 消费<br>
-     *    public static BiConsumer biConsumer = (x,y) -> { <br>
+     *    public static BiConsumer biConsumer = (x,y) - { <br>
      *     System.out.println("执行"+x+y);<br>
      *     };<br>
      * 调用方式<br>
-     *     doBiConsumer((x,y) -> {<br>
+     *     doBiConsumer((x,y) - {<br>
      *     System.out.println("执行"+x,y);<br>
      *     });<br>
      *
-     * @param BiConsumer 消费者
+     * @param biConsumer 消费者
      * @author kewei
      * @since 2023/02/08
      */
@@ -248,17 +261,18 @@ public class FutureUtil {
 
     /**
      * 异步执行 断言<br>
-     *    public static BiPredicate biPredicate = (x,y) -> { <br>
+     *    public static BiPredicate biPredicate = (x,y) - { <br>
      *     System.out.println("执行"+x+y);<br>
      *     return true;<br>
      *     };<br>
      * 调用方式<br>
-     *     doBiPredicate((x,y) -> {<br>
+     *     doBiPredicate((x,y) - {<br>
      *     System.out.println("执行"+x,y);<br>
      *     return true;<br>
      *     });<br>
      *
-     * @param BiPredicate 断言者
+     *
+     * @param biPredicate 断言
      * @return Future
      * @throws Exception Exception
      * @since 2023/02/08
@@ -276,12 +290,12 @@ public class FutureUtil {
 
     /**
      * 异步执行 函数<br>
-     *     public static BiFunction biFunction = (x,y) -> {<br>
+     *     public static BiFunction biFunction = (x,y) - {<br>
      *         System.out.println("执行");<br>
      *         return "执行";<br>
      *     };<br>
      * 调用方式<br>
-     *     doBiFunction((x,y) -> {<br>
+     *     doBiFunction((x,y) - {<br>
      *         System.out.println("执行");<br>
      *         return "执行";<br>
      *     });<br>
@@ -305,12 +319,12 @@ public class FutureUtil {
 
     /**
      * 异步执行 断言<br>
-     *    public static Predicate predicate = (x) -> { <br>
+     *    public static Predicate predicate = (x) - { <br>
      *     System.out.println("执行");<br>
      *     return true;<br>
      *     };<br>
      * 调用方式<br>
-     *     doPredicate((x) -> {<br>
+     *     doPredicate((x) - {<br>
      *     System.out.println("执行");<br>
      *     return true;<br>
      *     });<br>

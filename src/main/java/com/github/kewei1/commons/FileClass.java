@@ -40,13 +40,6 @@ public class FileClass {
      */
     private static String path = "D:\\File\\分类\\";
 
-    public static boolean addSUFFIX(String suffix){
-        return SUFFIX.add(suffix);
-    }
-
-    public static void setPath(String pa){
-        path = pa;
-    }
 
 
 
@@ -63,44 +56,6 @@ public class FileClass {
 
     private static Long startRunTime = 0L;
 
-
-
-    private static void await(){
-
-
-        if (taskCount.equals(completedTaskCount)){
-            FutureUtil.executorCount("任务完成");
-            FutureUtil.shutdown();
-            log.info("耗时："+(System.currentTimeMillis()-startRunTime)/1000+"秒");
-            return;
-        }
-
-
-
-        if (taskCount.equals(FutureUtil.getTaskCount()) && completedTaskCount.equals(FutureUtil.getCompletedTaskCount())){
-            FutureUtil.executorCount("任务完成");
-
-            FutureUtil.shutdown();
-            FutureUtil.executorCount("任务完成");
-            log.info("耗时："+((System.currentTimeMillis()-startRunTime)/1000 - 20) +"秒");
-            return;
-        }
-
-        taskCount = FutureUtil.getTaskCount();
-        completedTaskCount = FutureUtil.getCompletedTaskCount();
-
-
-        if (taskCount > completedTaskCount){
-            FutureUtil.executorCount("任务完成");
-            try {
-                Thread.sleep(20000);
-                await();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-    }
 
 
 
@@ -145,14 +100,83 @@ public class FileClass {
         });
     }
 
+    /**
+     * 等待
+     *
+     * @author kewei
+     * @since 2023/02/08
+     */
+    private static void await(){
+
+
+        if (taskCount.equals(completedTaskCount)){
+            FutureUtil.executorCount("任务完成");
+            FutureUtil.shutdown();
+            log.info("耗时："+(System.currentTimeMillis()-startRunTime)/1000+"秒");
+            return;
+        }
 
 
 
+        if (taskCount.equals(FutureUtil.getTaskCount()) && completedTaskCount.equals(FutureUtil.getCompletedTaskCount())){
+            FutureUtil.executorCount("任务完成");
+
+            FutureUtil.shutdown();
+            FutureUtil.executorCount("任务完成");
+            log.info("耗时："+((System.currentTimeMillis()-startRunTime)/1000 - 20) +"秒");
+            return;
+        }
+
+        taskCount = FutureUtil.getTaskCount();
+        completedTaskCount = FutureUtil.getCompletedTaskCount();
 
 
-    public static void main(String[] args) throws Exception {
-        fileClass();
+        if (taskCount > completedTaskCount){
+            FutureUtil.executorCount("任务完成");
+            try {
+                Thread.sleep(20000);
+                await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
+
+
+    /**
+     * 添加后缀
+     *
+     * @param suffix 后缀
+     * @author kewei
+     * @since 2023/02/08
+     */
+    public static void addSUFFIX(String suffix){
+        SUFFIX.add(suffix);
+        SUFFIX.stream().forEach(e->{
+            String dirStr = path+e.toString();
+            File directory = new File(dirStr);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+        });
+    }
+
+    /**
+     * 设置路径
+     *
+     * @param pa 路径
+     * @author kewei
+     * @since 2023/02/08
+     */
+    public static void setPath(String pa){
+        path = pa;
+    }
+
+
+
+
+
 
 
     /**
@@ -279,6 +303,7 @@ public class FileClass {
      * @param dirFile dir文件
      * @author kewei
      * @since 2023/02/08
+     * @return 文件夹下的所有文件
      */
     public static ArrayList<String> getDir(File dirFile)  {
         ArrayList<String> dirStrArr = new ArrayList<String>();
@@ -310,6 +335,7 @@ public class FileClass {
      * @param file 文件
      * @author kewei
      * @since 2023/02/08
+     * @return 创建时间
      */
     public static String getCreationTime(File file) {
         if (file == null) {
@@ -336,6 +362,7 @@ public class FileClass {
      * @param file 文件
      * @author kewei
      * @since 2023/02/08
+     * @return 最后访问时间
      */
     public static String getLastAccessTime(File file) {
         if (file == null) {
@@ -362,6 +389,7 @@ public class FileClass {
      * @param file 文件
      * @author kewei
      * @since 2023/02/08
+     * @return 最后修改时间
      */
     public static String getLastModifiedTime(File file) {
         if (file == null) {

@@ -106,6 +106,8 @@ public class JenkinsUtils {
      * @param httpRequest http请求
      * @author kewei
      * @since 2023/02/03
+     * @return String
+     * @throws Exception 异常
      */
     public  String customHttpMsg(String url, HttpRequest httpRequest) throws Exception {
         URI uri = new URI(url);
@@ -131,6 +133,7 @@ public class JenkinsUtils {
      *
      * @author kewei
      * @since 2023/02/03
+     * @return JSONArray
      */
     public    JSONArray getJobs()  {
         String JENKINS_URL =BASE_URL+SUFFIX;
@@ -151,6 +154,7 @@ public class JenkinsUtils {
      * @param job job信息
      * @author kewei
      * @since 2023/02/03
+     * @return JSONArray
      */
     public   JSONArray getNumbers(String job) {
         String JENKINS_URL =BASE_URL+JOB+job+SUFFIX;
@@ -172,6 +176,7 @@ public class JenkinsUtils {
      * @param build 构建
      * @author kewei
      * @since 2023/02/03
+     * @return JSONObject
      */
     public   JSONObject getBuild(String job,String build)  {
         String JENKINS_URL =BASE_URL+JOB+job+"/"+build+SUFFIX;

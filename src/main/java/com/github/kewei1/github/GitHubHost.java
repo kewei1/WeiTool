@@ -111,6 +111,7 @@ public class GitHubHost {
      *  初始化
      * @author kewei
      * @since 2023/02/03
+     *
      */
     private final static void  init() throws InterruptedException {
 
@@ -236,6 +237,7 @@ public class GitHubHost {
      * 配置dns类型
      * @author kewei
      * @since 2023/02/03
+     * @throws  InterruptedException 异常
      */
     public static void config(String type) throws InterruptedException {
         DNS_TYPE = type;
@@ -243,10 +245,7 @@ public class GitHubHost {
         init();
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        config(MYSSL);
-//        config(ADDRESSV4);
-    }
+
 
 
     /**
@@ -286,6 +285,7 @@ public class GitHubHost {
      *  获取domain的ip地址
      * @author kewei
      * @since 2023/02/03
+     * @return ip
      */
     public static String getIP(String domain){
         String ip = "";
@@ -428,6 +428,7 @@ public class GitHubHost {
      *  ip连接速度 毫秒为单位
      * @author kewei
      * @since 2023/02/03
+     * @return 速度
      */
     public final static synchronized  Long getSpeed(String ipAddress) {
         log.info(StrUtil.format("正在 测试{} 连接速度 \n",ipAddress));
