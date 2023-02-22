@@ -168,6 +168,10 @@ public class GitHubHost {
         saveHOSTS();
     }
 
+    public static void main(String[] args) throws InterruptedException {
+        GitHubHost.config(MYSSL);
+    }
+
     /**
      * @param
      *  设置hosts文件
