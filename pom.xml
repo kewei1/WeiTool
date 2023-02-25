@@ -122,11 +122,44 @@
           <scope>compile</scope>
       </dependency>
 
+    <!-- 微软microsoft graph-->
     <dependency>
-      <groupId>io.github.kewei1</groupId>
-      <artifactId>WeiTool</artifactId>
-      <version>1.0.2</version>
+      <groupId>com.microsoft.graph</groupId>
+      <artifactId>microsoft-graph</artifactId>
+      <version>5.22.0</version>
     </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-identity</artifactId>
+      <version>1.5.0</version>
+    </dependency>
+    <!-- 微软microsoft graph-->
+
+
+    <!-- web magic -->
+    <dependency>
+      <groupId>us.codecraft</groupId>
+      <artifactId>webmagic-core</artifactId>
+      <version>0.7.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>us.codecraft</groupId>
+      <artifactId>webmagic-extension</artifactId>
+      <version>0.7.3</version>
+    </dependency>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -446,4 +446,12 @@ public class GitHubHost {
         return System.currentTimeMillis() - ipSpeeed;
     }
 
+    //回收时
+    @Override
+    public void finalize() throws Throwable {
+        System.out.println("GitHubHost 对象被回收了");
+    }
+
+    //创建时
+
 }

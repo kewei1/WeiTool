@@ -21,14 +21,13 @@ public class BaseTest {
     }
 
     public static void main(String[] args) {
-        FileClass.addSUFFIX("mp9");
         FileClass.setPath("D:\\File\\分类1\\");
-        FileClass.fileClass("D:\\");
+        FileClass.fileClass("C:\\");
     }
 
 
     @Test
-    public void test(){
+    public void test() throws InterruptedException {
         FileClass.addSUFFIX("mp4");
         FileClass.setPath("D:\\File\\分类1\\");
         FileClass.fileClass("D:\\");

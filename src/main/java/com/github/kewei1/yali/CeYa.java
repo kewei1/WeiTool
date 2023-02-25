@@ -24,7 +24,8 @@ public class CeYa {
 
     @Test
     public void test() throws Exception{
-        getYaLiCeShi("https://www.baidu.com",1000);
+
+
     }
 
 
@@ -40,7 +41,13 @@ public class CeYa {
         for (int j = 0; j < count; j++) {
             int finalJ = j;
             FutureUtil.doRrnnable(()->{
-                HttpUtil.get(url);
+
+                try {
+                    HttpUtil.get(url);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 log.info("任务总数--{}--执行任务数--{}--剩余任务数{}",count, finalJ,countDownLatch.getCount());
                 countDownLatch.countDown();
             });

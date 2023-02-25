@@ -507,10 +507,14 @@ public class DateUtils extends DateTime {
     }
 
 
-
-
-
-
+    /**
+     * 年开始时间
+     *
+     * @param timeStamp 时间戳
+     * @param timeZone  时区
+     * @author kewei
+     * @since 2023/02/04
+     */
     public static Long getYearStartTime(Long timeStamp, String timeZone) {
         Calendar calendar = Calendar.getInstance();// 获取当前日期
         calendar.setTimeZone(TimeZone.getTimeZone(timeZone));
@@ -526,6 +530,13 @@ public class DateUtils extends DateTime {
         return calendar.getTimeInMillis();
     }
 
+    /**
+     * 年开始时间
+     *
+     * @param timeZone 时区
+     * @author kewei
+     * @since 2023/02/04
+     */
     public static Long getYearStartTime( String timeZone) {
         Calendar calendar = Calendar.getInstance();// 获取当前日期
         calendar.setTimeZone(TimeZone.getTimeZone(timeZone));
@@ -541,6 +552,13 @@ public class DateUtils extends DateTime {
         return calendar.getTimeInMillis();
     }
 
+    /**
+     * 年开始时间
+     *
+     * @param timeStamp 时间戳
+     * @author kewei
+     * @since 2023/02/04
+     */
     public static Long getYearStartTime(Long timeStamp) {
         Calendar calendar = Calendar.getInstance();// 获取当前日期
         calendar.setTimeZone(TimeZone.getTimeZone("GMT+8"));
@@ -556,6 +574,12 @@ public class DateUtils extends DateTime {
         return calendar.getTimeInMillis();
     }
 
+    /**
+     * 年开始时间
+     *
+     * @author kewei
+     * @since 2023/02/04
+     */
     public static Long getYearStartTime() {
         Calendar calendar = Calendar.getInstance();// 获取当前日期
         calendar.setTimeZone(TimeZone.getTimeZone("GMT+8"));
@@ -572,14 +596,14 @@ public class DateUtils extends DateTime {
     }
 
 
-
-
-
-
-
-
-
-
+    /**
+     * 获得年度结束时间
+     *
+     * @param timeStamp 时间戳
+     * @param timeZone  时区
+     * @author kewei
+     * @since 2023/02/04
+     */
     public static Long getYearEndTime(Long timeStamp, String timeZone) {
         Calendar calendar = Calendar.getInstance();// 获取当前日期
         calendar.setTimeZone(TimeZone.getTimeZone(timeZone));
@@ -595,6 +619,13 @@ public class DateUtils extends DateTime {
         return calendar.getTimeInMillis();
     }
 
+    /**
+     * 获得年度结束时间
+     *
+     * @param timeStamp 时间戳
+     * @author kewei
+     * @since 2023/02/04
+     */
     public static Long getYearEndTime(Long timeStamp) {
         Calendar calendar = Calendar.getInstance();// 获取当前日期
         calendar.setTimeZone(TimeZone.getTimeZone("GMT+8"));
@@ -610,6 +641,13 @@ public class DateUtils extends DateTime {
         return calendar.getTimeInMillis();
     }
 
+    /**
+     * 获得年度结束时间
+     *
+     * @param timeZone 时区
+     * @author kewei
+     * @since 2023/02/04
+     */
     public static Long getYearEndTime(String timeZone) {
         Calendar calendar = Calendar.getInstance();// 获取当前日期
         calendar.setTimeZone(TimeZone.getTimeZone(timeZone));
@@ -625,7 +663,12 @@ public class DateUtils extends DateTime {
         return calendar.getTimeInMillis();
     }
 
-
+    /**
+     * 获得年度结束时间
+     *
+     * @author kewei
+     * @since 2023/02/04
+     */
     public static Long getYearEndTime() {
         Calendar calendar = Calendar.getInstance();// 获取当前日期
         calendar.setTimeZone(TimeZone.getTimeZone("GMT+8"));
