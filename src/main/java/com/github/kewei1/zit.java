@@ -1,6 +1,10 @@
 package com.github.kewei1;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.github.kewei1.thread.FutureUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -9,12 +13,18 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class zit {
+
+    //日志
+    private static final cn.hutool.log.Log log = cn.hutool.log.LogFactory.get();
 
     private final static OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(60000, TimeUnit.MILLISECONDS)
             .readTimeout(60000, TimeUnit.MILLISECONDS)
@@ -28,83 +38,78 @@ public class zit {
     }
 
 
-    public static void main(String[] args) {
-
-        Set<String> ids = new HashSet<>();
-        //
-        for (int i = 1; i < 15; i++) {
-            Request request = new Request.Builder()
-                    .addHeader("Cookie","PHPSESSID=ohmmsd71vd1vii07q8fm5729jg; wordpress_test_cookie=WP%20Cookie%20check; wordpress_logged_in_5d06bcc535360be7c314d6b0998af49a=kewei%7C1677370160%7Ch8O8TLc1UMMBn6U3WSdhi4HEjecqXZGIoNySIJ69L9q%7C57cb298ed06e2fe4a35706ff7828ec9225ef06212f505d8ea1718be13586d57c")
-                    .url("https://www.217zy.com/page/"+i)
-                    .build();
 
 
-            Response response = null;
-            try {
-                response = client.newCall(request).execute();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+
+
+
+
+
+    @Test
+    public void test() throws Exception {
+//        https://zwmst.com/1671.html
+
+        JSONArray array = new JSONArray();
+        //10000
+        for (int i = 0; i < 100000; i++) {
+            int finalI = i;
+            Object o = FutureUtil.doCallable(() -> {
+                return extracted(finalI + "");
+            }).get();
+
+            JSONObject object = JSONObject.parseObject(o.toString());
+
+            if (object.containsKey("title")&&object.containsKey("category")&&object.containsKey("date")&&object.containsKey("content")) {
+                array.add(object);
             }
-            String str = null;
-            try {
-                str = response.body().string();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            Document docDesc = Jsoup.parse(str);
-
-            docDesc.getAllElements().forEach(element -> {
-                if (element.tagName().equals("a") && element.attr("href").contains("https://www.217zy.com/")) {
-                    //正则匹配
-                    String regex = "https://www.217zy.com/\\d+.html";
-                    //https://www.217zy.com/2761.html
-                    if (element.attr("href").matches(regex)) {
-                        String href = element.attr("href");
-                        //2761
-                        String id = href.substring(href.lastIndexOf("/") + 1, href.lastIndexOf("."));
-                        ids.add(id);
-                    }
-
-
-                }
-
-
-            });
         }
 
-        System.out.println(ids);
+        System.out.println(array.size());
 
-        ArrayList<String> urls = new ArrayList<>();
+        //将数据写入文件
+        cn.hutool.core.io.FileUtil.writeUtf8String(array.toJSONString(), "D:\\zwmst.json");
 
-        ids.forEach(e->{
-            //
-            Request request = new Request.Builder()
-                    .addHeader("Cookie","PHPSESSID=ohmmsd71vd1vii07q8fm5729jg; wordpress_test_cookie=WP%20Cookie%20check; wordpress_logged_in_5d06bcc535360be7c314d6b0998af49a=kewei%7C1677370160%7Ch8O8TLc1UMMBn6U3WSdhi4HEjecqXZGIoNySIJ69L9q%7C57cb298ed06e2fe4a35706ff7828ec9225ef06212f505d8ea1718be13586d57c")
-                    .url("https://www.217zy.com/go?post_id="+e)
-                    .build();
-
-            try {
-                Response execute = client.newCall(request).execute();
-                String string = execute.body().string();
-                System.out.println(string);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-
-
-
-
-
-
-
-        });
-
-
-
+        //将数据读出来
+        String s = cn.hutool.core.io.FileUtil.readUtf8String("D:\\zwmst.json");
 
     }
 
+
+
+
+    private static JSONObject extracted(String URL) {
+        JSONObject object = new JSONObject();
+        String s = HttpUtil.get("https://zwmst.com/"+URL+".html");
+        Document docDesc = Jsoup.parse(s);
+        docDesc.getElementsByClass("entry-title").forEach(e -> {
+            if (e.tagName().equals("h1")) {
+                object.put("title", e.text());
+            }
+        });
+        docDesc.getElementsByClass("meta-category").forEach(e -> {
+            object.put("category", e.text());
+        });
+        docDesc.getElementsByClass("meta-date").forEach(e -> {
+            object.put("date", e.text());
+        });
+
+        docDesc.getElementsByClass("entry-content u-text-format u-clearfix").forEach(e -> {
+            object.put("content", e.text());
+        });
+
+        if (object.containsKey("title")&&object.containsKey("category")&&object.containsKey("date")&&object.containsKey("content")) {
+            System.out.println(StrUtil.format(   "爬取:{}成功", "https://zwmst.com/"+URL+".html"));
+            System.out.println(StrUtil.format( "爬取{}页成功", URL));
+        }else {
+            System.out.println(StrUtil.format( "爬取:{}失败", "https://zwmst.com/"+URL+".html"));
+            System.out.println(StrUtil.format( "爬取失败 此{}页不存在数据", URL));
+
+            System.out.println();
+        }
+
+
+        return object;
+    }
 
 
 }

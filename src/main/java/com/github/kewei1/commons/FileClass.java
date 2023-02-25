@@ -2,7 +2,6 @@ package com.github.kewei1.commons;
 
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
-import com.github.kewei1.HuStringUtils;
 import com.github.kewei1.thread.FutureUtil;
 
 import java.io.*;
@@ -202,7 +201,7 @@ public class FileClass {
 
             File file;
 
-            if (!HuStringUtils.isEmpty(fileLocation)){
+            if (!WeiStr.HuStrUtils.isEmpty(fileLocation)){
                 file = new File(fileLocation);
             }else {
                 file = null;

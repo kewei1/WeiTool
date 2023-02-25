@@ -13,7 +13,9 @@ import org.junit.runner.Result;
 import java.util.Map;
 
 public class BaseTest {
+
     private static final Log log = LogFactory.get();
+
 
     @Before
     public void before() throws Exception{
@@ -27,7 +29,7 @@ public class BaseTest {
 
 
     @Test
-    public void test() throws InterruptedException {
+    public void test() throws Exception {
         FileClass.addSUFFIX("mp4");
         FileClass.setPath("D:\\File\\分类1\\");
         FileClass.fileClass("D:\\");
