@@ -14,7 +14,7 @@ public class WeiUtil {
     }
 
     //WeiTool 自定义 Http请求
-    public static final class Https extends com.github.kewei1.http.HttpUtil { }
+//    public static final class Https extends com.github.kewei1.http.HttpUtil { }
     //Hutool Http请求
     public static final class HuHttps extends cn.hutool.http.HttpUtil { }
 
