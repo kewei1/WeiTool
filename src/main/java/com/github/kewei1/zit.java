@@ -17,6 +17,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -26,45 +27,30 @@ public class zit {
     //日志
     private static final cn.hutool.log.Log log = cn.hutool.log.LogFactory.get();
 
-    private final static OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(60000, TimeUnit.MILLISECONDS)
-            .readTimeout(60000, TimeUnit.MILLISECONDS)
-            .build();
-
-
-    static {
-
-
-
-    }
-
-
-
-
-
-
-
-
-
     @Test
     public void test() throws Exception {
 //        https://zwmst.com/1671.html
 
-        JSONArray array = new JSONArray();
-        //10000
-        for (int i = 0; i < 100000; i++) {
+
+        final CountDownLatch countDownLatch = new CountDownLatch(20000);
+        //20000
+        for (int i = 0; i < 20000; i++) {
             int finalI = i;
-            Object o = FutureUtil.doCallable(() -> {
-                return extracted(finalI + "");
-            }).get();
-
-            JSONObject object = JSONObject.parseObject(o.toString());
-
-            if (object.containsKey("title")&&object.containsKey("category")&&object.containsKey("date")&&object.containsKey("content")) {
-                array.add(object);
-            }
+            FutureUtil.doRrnnable(() -> {
+                extracted(finalI + "");
+                countDownLatch.countDown();
+                System.out.println("👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇");
+                System.out.println("👉👉👉👉👉完成" + finalI+"👈👈👈👈👈");
+                System.out.println("👉👉👉👉👉剩余" + countDownLatch.getCount()+"👈👈👈👈👈");
+                System.out.println("👉👉👉👉👉成功" + array.size()+"👈👈👈👈👈");
+                System.out.println("👉👉👉👉👉失败" + list2.size()+"👈👈👈👈👈");
+                System.out.println("👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆 \r\n\r\n\r\n\r\n");
+            });
         }
 
-        System.out.println(array.size());
+        countDownLatch.await();
+        log.info("任务完成 爬到{}条记录" + array.size());
+
 
         //将数据写入文件
         cn.hutool.core.io.FileUtil.writeUtf8String(array.toJSONString(), "D:\\zwmst.json");
@@ -72,10 +58,32 @@ public class zit {
         //将数据读出来
         String s = cn.hutool.core.io.FileUtil.readUtf8String("D:\\zwmst.json");
 
+
+        //将数据写入文件 list2
+        cn.hutool.core.io.FileUtil.writeUtf8String(list2.toString(), "D:\\zwmst2.json");
+
+        //将数据读出来
+        String s2 = cn.hutool.core.io.FileUtil.readUtf8String("D:\\zwmst2.json");
+
+        JSONArray array2 = JSONArray.parseArray(s2);
+
+        array2.forEach(e -> {
+            extracted(e.toString());
+        });
+
+        //将数据写入文件
+        cn.hutool.core.io.FileUtil.writeUtf8String(array.toJSONString(), "D:\\zwmst2.json");
+
     }
 
 
+    static JSONArray array = new JSONArray();
 
+    //成功的url
+    static List<String> list  = new ArrayList();
+
+    //失败的url
+    static List<String> list2  = new ArrayList();
 
     private static JSONObject extracted(String URL) {
         JSONObject object = new JSONObject();
@@ -93,18 +101,16 @@ public class zit {
             object.put("date", e.text());
         });
 
+        object.put("url", "https://zwmst.com/"+URL+".html");
+
         docDesc.getElementsByClass("entry-content u-text-format u-clearfix").forEach(e -> {
             object.put("content", e.text());
         });
 
         if (object.containsKey("title")&&object.containsKey("category")&&object.containsKey("date")&&object.containsKey("content")) {
-            System.out.println(StrUtil.format(   "爬取:{}成功", "https://zwmst.com/"+URL+".html"));
-            System.out.println(StrUtil.format( "爬取{}页成功", URL));
+            array.add(object);
         }else {
-            System.out.println(StrUtil.format( "爬取:{}失败", "https://zwmst.com/"+URL+".html"));
-            System.out.println(StrUtil.format( "爬取失败 此{}页不存在数据", URL));
-
-            System.out.println();
+            list2.add(URL);
         }
 
 
