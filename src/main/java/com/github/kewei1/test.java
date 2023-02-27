@@ -2,6 +2,7 @@ package com.github.kewei1;
 
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import com.alibaba.fastjson.JSONObject;
 import com.github.kewei1.pachong.PaUtils;
 import com.github.kewei1.pachong.PaUtilsV2;
 import org.jsoup.Connection;
@@ -10,6 +11,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,18 +23,11 @@ public class test extends BaseTest{
     @Test
     public void test() throws Exception {
 
-//        Connection.Response response = PaUtilsV2.getPaUtils().getResponse("https://www.baidu.com");
+        PaUtilsV2 paUtils = PaUtilsV2.getPaUtils();
 
-        Document document = PaUtilsV2.getPaUtils().getDocument("https://xiaolincoding.com/network/1_base/tcp_ip_model.html");
+        Document document = paUtils.getDocument("https://xiaolincoding.com/");
 
-
-        document.select("");
-
-
-
-
-
-
+        paUtils.documentToBufferedImage(document,"D:\\test\\imgss\\");
 
     }
 }

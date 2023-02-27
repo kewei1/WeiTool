@@ -1,6 +1,8 @@
 package com.github.kewei1.pachong;
 
 import cn.hutool.crypto.digest.MD5;
+import com.alibaba.fastjson.JSONObject;
+import com.github.kewei1.http.HttpUtil;
 import okhttp3.OkHttpClient;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -10,21 +12,24 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class PaUtilsV2 {
 
-    /**
-     *  url
-     *
-     * @since 2023/02/27
-     */
-    private static  String URL = "";
+    //默认编码
+    public static final String DEFAULT_CHARSET = "UTF-8";
+
 
     /**
      *  浏览器标识
@@ -42,19 +47,19 @@ public class PaUtilsV2 {
      *  data 数据
      * @since 2023/02/27
      */
-    private static  Map<String, String> DATA = new HashMap<>();
+    private static  Map<String, Object> DATA = new HashMap<>();
 
     /**
      *  cookies 数据
      * @since 2023/02/27
      */
-    private static  Map<String, String> COOKIES = new HashMap<>();
+    private static  Map<String, Object> COOKIES = new HashMap<>();
 
     /**
      *  headers 数据
      * @since 2023/02/27
      */
-    private static  Map<String, String> HEADERS = new HashMap<>();
+    private static  Map<String, Object> HEADERS = new HashMap<>();
 
     /**
      *  忽略内容类型
@@ -68,7 +73,7 @@ public class PaUtilsV2 {
     private PaUtilsV2() {
     }
 
-    private PaUtilsV2(String userAgent, int connectTimeout, Map<String, String> data, Map<String, String> cookies, Map<String, String> headers, boolean ignoreContentType) {
+    private PaUtilsV2(String userAgent, int connectTimeout, Map<String, Object> data, Map<String, Object> cookies, Map<String, Object> headers, boolean ignoreContentType) {
         USER_AGENT = userAgent;
         CONNECTTIMEOUT = connectTimeout;
         DATA = data;
@@ -89,7 +94,7 @@ public class PaUtilsV2 {
      *  获取实例
      * @since 2023/02/27
      */
-    public static PaUtilsV2 getPaUtils(String userAgent, int connectTimeout, Map<String, String> data, Map<String, String> cookies, Map<String, String> headers, boolean ignoreContentType) {
+    public static PaUtilsV2 getPaUtils(String userAgent, int connectTimeout, Map<String, Object> data, Map<String, Object> cookies, Map<String, Object> headers, boolean ignoreContentType) {
         return new PaUtilsV2(userAgent, connectTimeout, data, cookies, headers, ignoreContentType);
     }
 
@@ -110,19 +115,21 @@ public class PaUtilsV2 {
     }
 
     //更改 data 数据
-    public PaUtilsV2 setDATA(Map<String, String> data) {
+    public PaUtilsV2 setDATA(Map<String, Object> data) {
         DATA = data;
         return new PaUtilsV2(USER_AGENT, CONNECTTIMEOUT, DATA, COOKIES, HEADERS, IGNORECONTENTTYPE);
     }
 
     //更改 cookies 数据
-    public PaUtilsV2 setCOOKIES(Map<String, String> cookies) {
+    public PaUtilsV2 setCOOKIES(Map<String, Object> cookies) {
         COOKIES = cookies;
+        //COOKIES 放入 HEADERS
+        HEADERS.put("Cookie", cookies.entrySet().stream().map(e ->""+ e.getValue()).collect(Collectors.joining(";")));
         return new PaUtilsV2(USER_AGENT, CONNECTTIMEOUT, DATA, COOKIES, HEADERS, IGNORECONTENTTYPE);
     }
 
     //更改 headers 数据
-    public PaUtilsV2 setHEADERS(Map<String, String> headers) {
+    public PaUtilsV2 setHEADERS(Map<String, Object> headers) {
         HEADERS = headers;
         return new PaUtilsV2(USER_AGENT, CONNECTTIMEOUT, DATA, COOKIES, HEADERS, IGNORECONTENTTYPE);
     }
@@ -134,20 +141,52 @@ public class PaUtilsV2 {
     }
 
 
+    //get 请求
+    public JSONObject doGet(String url) {
+        Validate.notNull(url, "url 不能为空");
+        //Map<String, Object>  转换 Map<String, Object>
+        Map<String, Object> data = DATA.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Object> cookies = COOKIES.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Object> headers = HEADERS.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        String s = null;
+        try {
+            s = HttpUtil.doGet(url,  headers, data, CONNECTTIMEOUT, CONNECTTIMEOUT,DEFAULT_CHARSET);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return JSONObject.parseObject(s);
+    }
+
+    public JSONObject doPost(String url){
+        Validate.notNull(url, "url 不能为空");
+        String s = null;
+        try {
+            s = HttpUtil.doPost(url, HEADERS, DATA, CONNECTTIMEOUT, CONNECTTIMEOUT,DEFAULT_CHARSET);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return JSONObject.parseObject(s);
+    }
+
+
+
 
     //获取 Connection.Response
     public Connection.Response getResponse(String url) throws IOException {
 
         Validate.notNull(url, "url 不能为空");
         Validate.isTrue(url.startsWith("http") || url.startsWith("https"), "url 必须以 http 或 https 开头");
-
+        //Map<String, Object>  转换 Map<String, String>
+        Map<String, String> data = DATA.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+        Map<String, String> cookies = COOKIES.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+        Map<String, String> headers = HEADERS.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
 
         Connection.Response execute = Jsoup.connect(url)
                 .userAgent(USER_AGENT)
                 .timeout(CONNECTTIMEOUT)
-                .data(DATA)
-                .cookies(COOKIES)
-                .headers(HEADERS)
+                .data(data)
+                .cookies(cookies)
+                .headers(headers)
                 .ignoreContentType(IGNORECONTENTTYPE)
                 .execute();
 
@@ -159,13 +198,15 @@ public class PaUtilsV2 {
 
         Validate.notNull(url, "url 不能为空");
         Validate.isTrue(url.startsWith("http") || url.startsWith("https"), "url 必须以 http 或 https 开头");
-
+        Map<String, String> data = DATA.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+        Map<String, String> cookies = COOKIES.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+        Map<String, String> headers = HEADERS.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
         Document document = Jsoup.connect(url)
                 .userAgent(USER_AGENT)
                 .timeout(CONNECTTIMEOUT)
-                .data(DATA)
-                .cookies(COOKIES)
-                .headers(HEADERS)
+                .data(data)
+                .cookies(cookies)
+                .headers(headers)
                 .ignoreContentType(IGNORECONTENTTYPE)
                 .get();
 
@@ -257,6 +298,8 @@ public class PaUtilsV2 {
                 list.set(i, list.get(i).replace("//https", "https"));
             }
         }
+
+
 
         //如果存在 //http 则替换为 http
         for (int i = 0; i < list.size(); i++) {
@@ -396,6 +439,106 @@ public class PaUtilsV2 {
 
         return list;
     }
+
+
+    //JSON 转换为 Map
+    public static Map<String, Object> jsonToMap(String json) {
+        Map<String, Object> map = new HashMap<>();
+        JSONObject jsonObject = JSONObject.parseObject(json);
+        for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+            map.put(entry.getKey(), entry.getValue());
+        }
+        return map;
+    }
+
+
+
+
+
+
+    protected static void generateOutput() throws Exception {
+        JEditorPane ed = new JEditorPane(new URL("https://blog.csdn.net/wanglq0086/article/details/60761614"));
+        ed.setSize(2000,2000);
+
+        //create a new image
+        BufferedImage image = new BufferedImage(ed.getWidth(), ed.getHeight(),
+                BufferedImage.TYPE_INT_ARGB);
+
+        //paint the editor onto the image
+        SwingUtilities.paintComponent(image.createGraphics(),
+                ed,
+                new JPanel(),
+                0, 0, image.getWidth(), image.getHeight());
+        //save the image to file
+        ImageIO.write((RenderedImage)image, "png", new File("html.png"));
+    }
+    public static void main(String[] args) {
+        try {
+            generateOutput();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //Document 转换为 图片 保存到本地
+    public static String documentToBufferedImage(Document document, String path) throws Exception {
+        Validate.notNull(document, "document不能为空");
+        Validate.isTrue(document instanceof Document, "document必须是Document对象");
+
+        Validate.notNull(path, "path不能为空");
+        File file = new File(path);
+        if (!file.exists()) {
+            boolean result = file.mkdirs(); // 优化1：使用 mkdirs() 方法创建多级目录
+            if (!result) {
+                throw new RuntimeException("Failed to create directory: " + file.getAbsolutePath());
+            }
+        }
+
+        // 创建 Swing 组件
+        JEditorPane ed = new JEditorPane();
+        ed.setContentType("text/html");
+        ed.setText(document.toString());
+        // 优化2：自动适应文档的大小
+        ed.setSize(ed.getPreferredSize());
+
+        // 创建 BufferedImage
+        BufferedImage image = new BufferedImage(ed.getWidth(), ed.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = image.createGraphics();
+        // 优化3：开启抗锯齿
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        // 绘制 Swing 组件
+        ed.print(g);
+
+        // 保存 BufferedImage 到本地
+        ImageIO.write(image, "png", new File(path, document.title() + ".png"));
+
+        return path;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
