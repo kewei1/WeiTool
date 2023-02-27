@@ -1,19 +1,19 @@
 package com.github.kewei1.pachong;
 
-import cn.hutool.http.HttpUtil;
 import okhttp3.OkHttpClient;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class PaUtils {
 
@@ -34,6 +34,25 @@ public class PaUtils {
     //writeTimeout
     private static int WRITETIMEOUT = 60000;
 
+    static {
+
+        try {
+            Connection.Response baiduid = Jsoup.connect("https://www.baidu.com")
+                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36")
+                    .timeout(60000)
+                    .cookie("BAIDUID", "E5E5B5B5B5B5B5B5B5B5B5B5B5B5B5B5:FG=1")
+                    .header("", "")
+                    .ignoreContentType(true)
+                    .execute();
+            //Document document = baiduid.parse();
+
+            Document document = baiduid.parse();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
 
 
     //空构造方法
@@ -48,29 +67,16 @@ public class PaUtils {
 
     //设置readTimeout
     public static PaUtils setREADTIMEOUT(int READTIMEOUT) {
-        PaUtils.READTIMEOUT = READTIMEOUT;
-        client.newBuilder().connectTimeout(CONNECTTIMEOUT, TimeUnit.MILLISECONDS)
-                .readTimeout(READTIMEOUT, TimeUnit.MILLISECONDS)
-                .writeTimeout(WRITETIMEOUT, TimeUnit.MILLISECONDS)
-                .build();
         return new PaUtils(COOKIES,HEADER,READTIMEOUT,CONNECTTIMEOUT,WRITETIMEOUT);
     }
     //设置connectTimeout
     public static PaUtils setCONNECTTIMEOUT(int CONNECTTIMEOUT) {
         PaUtils.CONNECTTIMEOUT = CONNECTTIMEOUT;
-        client.newBuilder().connectTimeout(CONNECTTIMEOUT, TimeUnit.MILLISECONDS)
-                .readTimeout(READTIMEOUT, TimeUnit.MILLISECONDS)
-                .writeTimeout(WRITETIMEOUT, TimeUnit.MILLISECONDS)
-                .build();
         return new PaUtils(COOKIES,HEADER,READTIMEOUT,CONNECTTIMEOUT,WRITETIMEOUT);
     }
     //设置writeTimeout
     public static PaUtils setWRITETIMEOUT(int WRITETIMEOUT) {
         PaUtils.WRITETIMEOUT = WRITETIMEOUT;
-        client.newBuilder().connectTimeout(CONNECTTIMEOUT, TimeUnit.MILLISECONDS)
-                .readTimeout(READTIMEOUT, TimeUnit.MILLISECONDS)
-                .writeTimeout(WRITETIMEOUT, TimeUnit.MILLISECONDS)
-                .build();
         return new PaUtils(COOKIES,HEADER,READTIMEOUT,CONNECTTIMEOUT,WRITETIMEOUT);
     }
     //设置cookie
@@ -128,9 +134,6 @@ public class PaUtils {
 
 
 
-    private static final String BASEURL ="https://xiaolincoding.com/";
-
-
     /**
      * 获取H5网页  Document
      *
@@ -152,6 +155,9 @@ public class PaUtils {
         return docDesc;
 
     }
+
+
+
 
     //获取网页的标题
     public  String getH5Title(String url){
@@ -179,6 +185,140 @@ public class PaUtils {
         Document h5Document = getH5Document(url);
         return h5Document.getAllElements();
     }
+
+
+    //all[]	提供对文档中所有 HTML 元素的访问。
+    //anchors[]	返回对文档中所有 Anchor 对象的引用。
+    //applets	返回对文档中所有 Applet 对象的引用。
+    //forms[]	返回对文档中所有 Form 对象引用。
+    //images[]	返回对文档中所有 Image 对象引用。
+    //links[]	返回对文档中所有 Area 和 Link 对象引用。
+
+
+    //所有 HTML 元素
+    public  Elements getH5All(String url){
+        Document h5Document = getH5Document(url);
+        return h5Document.getAllElements();
+    }
+
+    //所有 Anchor 对象
+    public  Elements getH5AllAnchor(String url){
+        Document h5Document = getH5Document(url);
+        Elements allElements = h5Document.getAllElements();
+        //过滤出  所有 Anchor 对象
+        Elements anchors = allElements.stream().filter(e->e.tagName().equals("a")).collect(Collectors.toCollection(Elements::new));
+
+        return anchors;
+    }
+
+    //所有 Applet 对象
+    public  Elements getH5AllApplet(String url){
+        Document h5Document = getH5Document(url);
+        Elements allElements = h5Document.getAllElements();
+        //过滤出  所有 Applet 对象
+        Elements applets = allElements.stream().filter(e->e.tagName().equals("applet")).collect(Collectors.toCollection(Elements::new));
+
+        return applets;
+    }
+
+    //所有 Form 对象
+    public  Elements getH5AllForm(String url){
+        Document h5Document = getH5Document(url);
+        Elements allElements = h5Document.getAllElements();
+        //过滤出  所有 Form 对象
+        Elements forms = allElements.stream().filter(e->e.tagName().equals("form")).collect(Collectors.toCollection(Elements::new));
+
+        return forms;
+    }
+
+    //所有 Image 对象
+    public  Elements getH5AllImage(String url){
+        Document h5Document = getH5Document(url);
+        Elements allElements = h5Document.getAllElements();
+        //过滤出  所有 Image 对象
+        Elements images = allElements.stream().filter(e->e.tagName().equals("img")).collect(Collectors.toCollection(Elements::new));
+
+        return images;
+    }
+
+    //所有 Area 和 Link 对象
+    public  Elements getH5AllAreaAndLink(String url){
+        Document h5Document = getH5Document(url);
+        Elements allElements = h5Document.getAllElements();
+        //过滤出  所有 Area 和 Link 对象
+        Elements links = allElements.stream().filter(e->e.tagName().equals("a") || e.tagName().equals("link")).collect(Collectors.toCollection(Elements::new));
+
+        return links;
+    }
+
+
+    //body  TODO
+    //
+    //提供对 <body> 元素的直接访问。
+    //
+    //对于定义了框架集的文档，该属性引用最外层的 <frameset>。
+    //cookie	设置或返回与当前文档有关的所有 cookie。
+    //domain	返回当前文档的域名。
+    //lastModified	返回文档被最后修改的日期和时间。
+    //referrer	返回载入当前文档的文档的 URL。
+    //title	返回当前文档的标题。
+    //URL	返回当前文档的 URL。
+    //————————————————
+
+
+
+    //拿到 Document 中所有的  Attribute
+    public  List<Attributes> getH5AttributeAllTag(Document document){
+        List<Attributes> attributes = new ArrayList();
+        document.getAllElements().forEach(e->{
+            attributes.add(e.attributes());
+        });
+        return attributes;
+    }
+
+    // 拿到 Elements 中所有的  Attribute
+    public  List<Attributes> getH5ElementsAllTag(Element elements){
+        List<Attributes> attributes = new ArrayList();
+
+        elements.getAllElements().forEach(e->{
+            attributes.add(e.attributes());
+        });
+        return attributes;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     //获取 Document中所有的 Attribute
     public  List<Attributes> getH5AllTag(Elements elements){
@@ -257,14 +397,12 @@ public class PaUtils {
         return alts;
     }
 
-    //获取网页 所有的 图片
+    //Image  返回对文档中所有 Image 对象引用。
     public  List<String> getH5AllImg(String url){
         List<String> imgs = new ArrayList();
         List<Attributes> h5AllTag = getH5AllTag(url);
         h5AllTag.forEach(e->{
-            if (e.get("img")!=null && !"".equals(e.get("img"))){
-                imgs.add(e.get("img"));
-            }
+            imgs.add(e.get("img"));
         });
         return imgs;
     }
