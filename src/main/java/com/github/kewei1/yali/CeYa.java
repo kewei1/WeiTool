@@ -124,17 +124,7 @@ public class CeYa {
         }
     }
 
-//    public static void main(String[] args) {
-//
-//        //电脑名称  WiFi名称 IP地址 MAC地址 网关  子网掩码
-//
-//
-//        //ping
-////        openCmd("cmd /c ping qq.com");
-//
-//
-//
-//    }
+
 
 
 

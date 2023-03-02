@@ -1,4 +1,4 @@
-package com.github.kewei1;
+package com.github.kewei1.commons;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.Log;

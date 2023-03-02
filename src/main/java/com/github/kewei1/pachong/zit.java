@@ -1,4 +1,4 @@
-package com.github.kewei1;
+package com.github.kewei1.pachong;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
@@ -30,7 +30,6 @@ public class zit {
     @Test
     public void test() throws Exception {
 //        https://zwmst.com/1671.html
-
 
         final CountDownLatch countDownLatch = new CountDownLatch(20000);
         //20000

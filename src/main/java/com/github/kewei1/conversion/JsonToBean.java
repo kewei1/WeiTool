@@ -1,10 +1,8 @@
-package com.github.kewei1.model;
+package com.github.kewei1.conversion;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.github.kewei1.model.JsonMetaNode;
 
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

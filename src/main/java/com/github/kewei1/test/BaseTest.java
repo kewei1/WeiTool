@@ -1,4 +1,4 @@
-package com.github.kewei1;
+package com.github.kewei1.test;
 
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;

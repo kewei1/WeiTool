@@ -1,566 +1,559 @@
 package com.github.kewei1.pachong;
 
-import okhttp3.OkHttpClient;
+import com.alibaba.fastjson.JSONObject;
+import com.github.kewei1.http.HttpUtil;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class PaUtils {
 
-    private final static OkHttpClient client = new OkHttpClient();
-
-    //cookie
-    private static String COOKIES ="";
-
-    //请求头
-    private static Map<String,String> HEADER = new HashMap<>();
-
-
-
-    //readTimeout
-    private static int READTIMEOUT = 60000;
-    //connectTimeout
-    private static int CONNECTTIMEOUT = 60000;
-    //writeTimeout
-    private static int WRITETIMEOUT = 60000;
-
-    static {
-
-        try {
-            Connection.Response baiduid = Jsoup.connect("https://www.baidu.com")
-                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36")
-                    .timeout(60000)
-                    .cookie("BAIDUID", "E5E5B5B5B5B5B5B5B5B5B5B5B5B5B5B5:FG=1")
-                    .header("", "")
-                    .ignoreContentType(true)
-                    .execute();
-            //Document document = baiduid.parse();
-
-            Document document = baiduid.parse();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-
-
-    //空构造方法
-    private PaUtils() {
-        //client
-        client.newBuilder().connectTimeout(CONNECTTIMEOUT, TimeUnit.MILLISECONDS)
-                .readTimeout(READTIMEOUT, TimeUnit.MILLISECONDS)
-                .writeTimeout(WRITETIMEOUT, TimeUnit.MILLISECONDS)
-                .build();
-    }
-
-
-    //设置readTimeout
-    public static PaUtils setREADTIMEOUT(int READTIMEOUT) {
-        return new PaUtils(COOKIES,HEADER,READTIMEOUT,CONNECTTIMEOUT,WRITETIMEOUT);
-    }
-    //设置connectTimeout
-    public static PaUtils setCONNECTTIMEOUT(int CONNECTTIMEOUT) {
-        PaUtils.CONNECTTIMEOUT = CONNECTTIMEOUT;
-        return new PaUtils(COOKIES,HEADER,READTIMEOUT,CONNECTTIMEOUT,WRITETIMEOUT);
-    }
-    //设置writeTimeout
-    public static PaUtils setWRITETIMEOUT(int WRITETIMEOUT) {
-        PaUtils.WRITETIMEOUT = WRITETIMEOUT;
-        return new PaUtils(COOKIES,HEADER,READTIMEOUT,CONNECTTIMEOUT,WRITETIMEOUT);
-    }
-    //设置cookie
-    public static PaUtils setCOOKIES(String COOKIES) {
-        PaUtils.COOKIES = COOKIES;
-        return new PaUtils(COOKIES,HEADER,READTIMEOUT,CONNECTTIMEOUT,WRITETIMEOUT);
-    }
-    //设置请求头
-    public static PaUtils setHEADER(Map<String,String> HEADER) {
-        PaUtils.HEADER = HEADER;
-        return new PaUtils(COOKIES,HEADER,READTIMEOUT,CONNECTTIMEOUT,WRITETIMEOUT);
-    }
-
-
-
-
-
-
-
-
-    //构造方法
-    private PaUtils(String cookies, Map<String,String> header, int readTimeout, int connectTimeout, int writeTimeout) {
-        this.COOKIES = cookies;
-        this.HEADER = header;
-        this.READTIMEOUT = readTimeout;
-        this.CONNECTTIMEOUT = connectTimeout;
-        this.WRITETIMEOUT = writeTimeout;
-
-        //判断 COOKIES 是否为空
-        if(!COOKIES.equals("")){
-            client.interceptors().add(chain -> {
-                okhttp3.Request request = chain.request().newBuilder().addHeader("Cookie", COOKIES).build();
-                return chain.proceed(request);
-            });
-        }
-
-        HEADER.forEach((k,v)->{
-            client.interceptors().add(chain -> {
-                okhttp3.Request request = chain.request().newBuilder().addHeader(k, v).build();
-                return chain.proceed(request);
-            });
-        });
-
-        client.newBuilder().connectTimeout(CONNECTTIMEOUT, TimeUnit.MILLISECONDS)
-                .readTimeout(READTIMEOUT, TimeUnit.MILLISECONDS)
-                .writeTimeout(WRITETIMEOUT, TimeUnit.MILLISECONDS)
-                .build();
-    }
-
-
-    //getPaUtils
-    public static PaUtils getPaUtils(){
-        return new PaUtils();
-    }
-
+    //默认编码
+    public static final String DEFAULT_CHARSET = "UTF-8";
 
 
     /**
-     * 获取H5网页  Document
-     *
-     * @param url url
-     * @author kewei
-     * @since 2023/02/26
+     *  浏览器标识
+     * @since 2023/02/27
      */
-    public  Document getH5Document(String url){
-        //爬取网页
-        String htmlStr = null;
+    private static  String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36";
+
+    /**
+     *  连接超时时间
+     * @since 2023/02/27
+     */
+    private static  int CONNECTTIMEOUT = 60000;
+
+    /**
+     *  data 数据
+     * @since 2023/02/27
+     */
+    private static  Map<String, Object> DATA = new HashMap<>();
+
+    /**
+     *  cookies 数据
+     * @since 2023/02/27
+     */
+    private static  Map<String, Object> COOKIES = new HashMap<>();
+
+    /**
+     *  headers 数据
+     * @since 2023/02/27
+     */
+    private static  Map<String, Object> HEADERS = new HashMap<>();
+
+    /**
+     *  忽略内容类型
+     * @since 2023/02/27
+     */
+    private static  boolean IGNORECONTENTTYPE = true;
+
+
+
+    //构造器私有化
+    private PaUtils() {
+    }
+
+    private PaUtils(String userAgent, int connectTimeout, Map<String, Object> data, Map<String, Object> cookies, Map<String, Object> headers, boolean ignoreContentType) {
+        USER_AGENT = userAgent;
+        CONNECTTIMEOUT = connectTimeout;
+        DATA = data;
+        COOKIES = cookies;
+        HEADERS = headers;
+        IGNORECONTENTTYPE = ignoreContentType;
+    }
+
+    /**
+     *  获取实例
+     * @since 2023/02/27
+     */
+    public static PaUtils getPaUtils() {
+        return new PaUtils();
+    }
+
+    /**
+     *  获取实例
+     * @since 2023/02/27
+     */
+    public static PaUtils getPaUtils(String userAgent, int connectTimeout, Map<String, Object> data, Map<String, Object> cookies, Map<String, Object> headers, boolean ignoreContentType) {
+        return new PaUtils(userAgent, connectTimeout, data, cookies, headers, ignoreContentType);
+    }
+
+
+
+
+
+    //更改浏览器标识
+    public PaUtils setUSER_AGENT(String userAgent) {
+        USER_AGENT = userAgent;
+        return new PaUtils(USER_AGENT, CONNECTTIMEOUT, DATA, COOKIES, HEADERS, IGNORECONTENTTYPE);
+    }
+
+    //更改连接超时时间
+    public PaUtils setCONNECTTIMEOUT(int connectTimeout) {
+        CONNECTTIMEOUT = connectTimeout;
+        return new PaUtils(USER_AGENT, CONNECTTIMEOUT, DATA, COOKIES, HEADERS, IGNORECONTENTTYPE);
+    }
+
+    //更改 data 数据
+    public PaUtils setDATA(Map<String, Object> data) {
+        DATA = data;
+        return new PaUtils(USER_AGENT, CONNECTTIMEOUT, DATA, COOKIES, HEADERS, IGNORECONTENTTYPE);
+    }
+
+    //更改 cookies 数据
+    public PaUtils setCOOKIES(Map<String, Object> cookies) {
+        COOKIES = cookies;
+        //COOKIES 放入 HEADERS
+        HEADERS.put("Cookie", cookies.entrySet().stream().map(e ->""+ e.getValue()).collect(Collectors.joining(";")));
+        return new PaUtils(USER_AGENT, CONNECTTIMEOUT, DATA, COOKIES, HEADERS, IGNORECONTENTTYPE);
+    }
+
+    //更改 headers 数据
+    public PaUtils setHEADERS(Map<String, Object> headers) {
+        HEADERS = headers;
+        return new PaUtils(USER_AGENT, CONNECTTIMEOUT, DATA, COOKIES, HEADERS, IGNORECONTENTTYPE);
+    }
+
+    //更改 忽略内容类型
+    public PaUtils setIGNORECONTENTTYPE(boolean ignoreContentType) {
+        IGNORECONTENTTYPE = ignoreContentType;
+        return new PaUtils(USER_AGENT, CONNECTTIMEOUT, DATA, COOKIES, HEADERS, IGNORECONTENTTYPE);
+    }
+
+
+    //get 请求
+    public JSONObject doGet(String url) {
+        Validate.notNull(url, "url 不能为空");
+        //Map<String, Object>  转换 Map<String, Object>
+        Map<String, Object> data = DATA.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Object> cookies = COOKIES.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Object> headers = HEADERS.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        String s = null;
         try {
-            htmlStr = client.newCall(new okhttp3.Request.Builder().url(url).build()).execute().body().string();
+            s = HttpUtil.doGet(url,  headers, data, CONNECTTIMEOUT, CONNECTTIMEOUT,DEFAULT_CHARSET);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return JSONObject.parseObject(s);
+    }
+
+    public JSONObject doPost(String url){
+        Validate.notNull(url, "url 不能为空");
+        String s = null;
+        try {
+            s = HttpUtil.doPost(url, HEADERS, DATA, CONNECTTIMEOUT, CONNECTTIMEOUT,DEFAULT_CHARSET);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return JSONObject.parseObject(s);
+    }
+
+
+
+
+    //获取 Connection.Response
+    public Connection.Response getResponse(String url) throws IOException {
+
+        Validate.notNull(url, "url 不能为空");
+        Validate.isTrue(url.startsWith("http") || url.startsWith("https"), "url 必须以 http 或 https 开头");
+        //Map<String, Object>  转换 Map<String, String>
+        Map<String, String> data = DATA.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+        Map<String, String> cookies = COOKIES.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+        Map<String, String> headers = HEADERS.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+
+        Connection.Response execute = Jsoup.connect(url)
+                .userAgent(USER_AGENT)
+                .timeout(CONNECTTIMEOUT)
+                .data(data)
+                .cookies(cookies)
+                .headers(headers)
+                .ignoreContentType(IGNORECONTENTTYPE)
+                .execute();
+
+        return execute;
+    }
+
+    //获取 Document
+    public Document getDocument(String url)  {
+
+        Validate.notNull(url, "url 不能为空");
+        Validate.isTrue(url.startsWith("http") || url.startsWith("https"), "url 必须以 http 或 https 开头");
+        Map<String, String> data = DATA.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+        Map<String, String> cookies = COOKIES.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+        Map<String, String> headers = HEADERS.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+        Document document = null;
+        try {
+            document = Jsoup.connect(url)
+                    .userAgent(USER_AGENT)
+                    .timeout(CONNECTTIMEOUT)
+                    .data(data)
+                    .cookies(cookies)
+                    .headers(headers)
+                    .ignoreContentType(IGNORECONTENTTYPE)
+                    .get();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        //解析网页
-        Document docDesc = Jsoup.parse(htmlStr);
 
-        return docDesc;
 
+        return document;
     }
 
 
 
 
-    //获取网页的标题
-    public  String getH5Title(String url){
-        Document h5Document = getH5Document(url);
-        String title = h5Document.title();
-        return title;
+    //获取 Document 所有 DOM 元素对象
+
+    public static Elements getElements(Document document) throws IOException {
+
+        Validate.notNull(document, "document 不能为空");
+        //判断 document 是否  Document 对象
+        Validate.isTrue(document instanceof Document, "document 必须是 Document 对象");
+
+        Elements elements = document.getAllElements();
+
+        return elements;
     }
 
-    //获取网页的内容
-    public  String getH5Content(String url){
-        Document h5Document = getH5Document(url);
-        String content = h5Document.body().text();
-        return content;
+    //获取 Element 中 所有DOM 属性 对象
+    public static Attributes getAttributes(Element element) throws IOException {
+
+        Validate.notNull(element, "element 不能为空");
+        //判断 element 是否  Element 对象
+        Validate.isTrue(element instanceof Element, "element 必须是 Element 对象");
+
+        Attributes attributes = element.attributes();
+
+        return attributes;
     }
 
-    //获取网页的内容
-    public  String getH5Content(String url,String cssQuery){
-        Document h5Document = getH5Document(url);
-        String content = h5Document.select(cssQuery).text();
-        return content;
-    }
+    //获取 Document 中 所有的 图片
+    public static Elements getImages(Document document) throws IOException {
 
-    //获取网页 所有的 css选择器
-    public  Elements getH5AllCssQuery(String url){
-        Document h5Document = getH5Document(url);
-        return h5Document.getAllElements();
-    }
+        Validate.notNull(document, "document 不能为空");
+        //判断 document 是否  Document 对象
+        Validate.isTrue(document instanceof Document, "document 必须是 Document 对象");
 
-
-    //all[]	提供对文档中所有 HTML 元素的访问。
-    //anchors[]	返回对文档中所有 Anchor 对象的引用。
-    //applets	返回对文档中所有 Applet 对象的引用。
-    //forms[]	返回对文档中所有 Form 对象引用。
-    //images[]	返回对文档中所有 Image 对象引用。
-    //links[]	返回对文档中所有 Area 和 Link 对象引用。
-
-
-    //所有 HTML 元素
-    public  Elements getH5All(String url){
-        Document h5Document = getH5Document(url);
-        return h5Document.getAllElements();
-    }
-
-    //所有 Anchor 对象
-    public  Elements getH5AllAnchor(String url){
-        Document h5Document = getH5Document(url);
-        Elements allElements = h5Document.getAllElements();
-        //过滤出  所有 Anchor 对象
-        Elements anchors = allElements.stream().filter(e->e.tagName().equals("a")).collect(Collectors.toCollection(Elements::new));
-
-        return anchors;
-    }
-
-    //所有 Applet 对象
-    public  Elements getH5AllApplet(String url){
-        Document h5Document = getH5Document(url);
-        Elements allElements = h5Document.getAllElements();
-        //过滤出  所有 Applet 对象
-        Elements applets = allElements.stream().filter(e->e.tagName().equals("applet")).collect(Collectors.toCollection(Elements::new));
-
-        return applets;
-    }
-
-    //所有 Form 对象
-    public  Elements getH5AllForm(String url){
-        Document h5Document = getH5Document(url);
-        Elements allElements = h5Document.getAllElements();
-        //过滤出  所有 Form 对象
-        Elements forms = allElements.stream().filter(e->e.tagName().equals("form")).collect(Collectors.toCollection(Elements::new));
-
-        return forms;
-    }
-
-    //所有 Image 对象
-    public  Elements getH5AllImage(String url){
-        Document h5Document = getH5Document(url);
-        Elements allElements = h5Document.getAllElements();
-        //过滤出  所有 Image 对象
-        Elements images = allElements.stream().filter(e->e.tagName().equals("img")).collect(Collectors.toCollection(Elements::new));
+        Elements images = document.select("img[src~=(?i)\\.(png|jpe?g|gif)]");
 
         return images;
     }
 
-    //所有 Area 和 Link 对象
-    public  Elements getH5AllAreaAndLink(String url){
-        Document h5Document = getH5Document(url);
-        Elements allElements = h5Document.getAllElements();
-        //过滤出  所有 Area 和 Link 对象
-        Elements links = allElements.stream().filter(e->e.tagName().equals("a") || e.tagName().equals("link")).collect(Collectors.toCollection(Elements::new));
 
-        return links;
+    //获取 Document 中 所有的 图片 链接
+    public static List<String> getImagesUrl(Document document) throws IOException {
+
+        Validate.notNull(document, "document 不能为空");
+        //判断 document 是否  Document 对象
+        Validate.isTrue(document instanceof Document, "document 必须是 Document 对象");
+
+        Elements images = document.select("img[src~=(?i)\\.(png|jpe?g|gif)]");
+
+        List<String> list = new ArrayList<>();
+
+        for (Element image : images) {
+            list.add(image.attr("src"));
+        }
+
+        //去重
+        list = list.stream().distinct().collect(Collectors.toList());
+
+         list = extracted(document, list);
+
+
+        return list;
     }
 
+    private static List<String> extracted(Document document, List<String> list) {
 
-    //body  TODO
-    //
-    //提供对 <body> 元素的直接访问。
-    //
-    //对于定义了框架集的文档，该属性引用最外层的 <frameset>。
-    //cookie	设置或返回与当前文档有关的所有 cookie。
-    //domain	返回当前文档的域名。
-    //lastModified	返回文档被最后修改的日期和时间。
-    //referrer	返回载入当前文档的文档的 URL。
-    //title	返回当前文档的标题。
-    //URL	返回当前文档的 URL。
-    //————————————————
+        //去除"" 项
+        list.remove("");
 
 
-
-    //拿到 Document 中所有的  Attribute
-    public  List<Attributes> getH5AttributeAllTag(Document document){
-        List<Attributes> attributes = new ArrayList();
-        document.getAllElements().forEach(e->{
-            attributes.add(e.attributes());
-        });
-        return attributes;
-    }
-
-    // 拿到 Elements 中所有的  Attribute
-    public  List<Attributes> getH5ElementsAllTag(Element elements){
-        List<Attributes> attributes = new ArrayList();
-
-        elements.getAllElements().forEach(e->{
-            attributes.add(e.attributes());
-        });
-        return attributes;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //获取 Document中所有的 Attribute
-    public  List<Attributes> getH5AllTag(Elements elements){
-        List<Attributes> attributes = new ArrayList();
-        elements.forEach(e->{
-            e.getAllElements().forEach(f->{
-                attributes.add(f.attributes());
-            });
-        });
-        return attributes;
-    }
-
-    public  List<Attributes> getH5AllTag(String url){
-        Elements h5AllCssQuery = getH5AllCssQuery(url);
-        return getH5AllTag(h5AllCssQuery);
-    }
-
-
-    //获取网页 所有的 class
-    public  List<String> getH5AllClass(String url){
-        List<String> classes = new ArrayList();
-        List<Attributes> h5AllTag = getH5AllTag(url);
-        h5AllTag.forEach(e->{
-            classes.add(e.get("class"));
-        });
-        return classes;
-    }
-
-    //获取网页 所有的 id
-    public  List<String> getH5AllId(String url){
-        List<String> ids = new ArrayList();
-        List<Attributes> h5AllTag = getH5AllTag(url);
-        h5AllTag.forEach(e->{
-            ids.add(e.get("id"));
-        });
-        return ids;
-    }
-
-    //获取网页 所有的 href
-    public  List<String> getH5AllHref(String url){
-        List<String> hrefs = new ArrayList();
-        List<Attributes> h5AllTag = getH5AllTag(url);
-        h5AllTag.forEach(e->{
-            hrefs.add(e.get("href"));
-        });
-        return hrefs;
-    }
-
-    //获取网页 所有的 src
-    public  List<String> getH5AllSrc(String url){
-        List<String> srcs = new ArrayList();
-        List<Attributes> h5AllTag = getH5AllTag(url);
-        h5AllTag.forEach(e->{
-            srcs.add(e.get("src"));
-        });
-        return srcs;
-    }
-
-    //获取网页 所有的 style
-    public  List<String> getH5AllStyle(String url){
-        List<String> styles = new ArrayList();
-        List<Attributes> h5AllTag = getH5AllTag(url);
-        h5AllTag.forEach(e->{
-            styles.add(e.get("style"));
-        });
-        return styles;
-    }
-
-    //获取网页 所有的 alt
-    public  List<String> getH5AllAlt(String url){
-        List<String> alts = new ArrayList();
-        List<Attributes> h5AllTag = getH5AllTag(url);
-        h5AllTag.forEach(e->{
-            alts.add(e.get("alt"));
-        });
-        return alts;
-    }
-
-    //Image  返回对文档中所有 Image 对象引用。
-    public  List<String> getH5AllImg(String url){
-        List<String> imgs = new ArrayList();
-        List<Attributes> h5AllTag = getH5AllTag(url);
-        h5AllTag.forEach(e->{
-            imgs.add(e.get("img"));
-        });
-        return imgs;
-    }
-
-    //获取网页 所有的 a
-    public  List<String> getH5AllA(String url){
-        List<String> as = new ArrayList();
-        List<Attributes> h5AllTag = getH5AllTag(url);
-        h5AllTag.forEach(e->{
-            as.add(e.get("a"));
-        });
-        return as;
-    }
-
-    //获取网页 所有的 input
-    public  List<String> getH5AllInput(String url){
-        List<String> inputs = new ArrayList();
-        List<Attributes> h5AllTag = getH5AllTag(url);
-        h5AllTag.forEach(e->{
-            inputs.add(e.get("input"));
-        });
-        return inputs;
-    }
-
-    //去除重复的 List<String> h5AllClass
-    public  List<String> removeDuplicate(List<String> list){
-        Set<String> set = new HashSet<String>(list);
-        List<String> newList = new ArrayList<String>(set);
-        return newList;
-    }
-
-    //去除重复的 List<Attributes> attributes
-    public  List<Attributes> removeDuplicateAttributes(List<Attributes> list){
-        Set<Attributes> set = new HashSet<Attributes>(list);
-        List<Attributes> newList = new ArrayList<Attributes>(set);
-        return newList;
-    }
-
-
-    //获取 网页 所有的 div
-    public  List<String> getH5AllDiv(String url,String attribute){
-        List<String> divs = new ArrayList();
-        List<Attributes> h5AllTag = getH5AllTag(url);
-        h5AllTag.forEach(e->{
-            divs.add(e.get(attribute));
-        });
-        return divs;
-    }
-
-    //将网页保存到本地
-    public String savePage(String url,String path){
-
-        Document h5Document = getH5Document(url);
-        String htmlStr = h5Document.html();
-        //获取html 文件名
-        String fileName = getH5Title(url);
-        //获取html 文件路径
-        String filePath = path + fileName + ".html";
-        //创建文件
-        File file = new File(filePath);
-        //创建文件夹
-        File fileParent = file.getParentFile();
-        if(!fileParent.exists()){
-            fileParent.mkdirs();
+        //如果存在 //www 则替换为 https://www
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).startsWith("//www")) {
+                list.set(i, list.get(i).replace("//www", "https://www"));
+            }
+        }
+        //如果存在 //https 则替换为 https
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).startsWith("//https")) {
+                list.set(i, list.get(i).replace("//https", "https"));
+            }
         }
 
 
-        //将htmlStr 中所有相对地址 换成 绝对地址
-//        htmlStr = parseHtml(url);
+
+        //如果存在 //http 则替换为 http
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).startsWith("//http")) {
+                list.set(i, list.get(i).replace("//http", "http"));
+            }
+        }
+
+        //如果是相对地址 则拼接 成 绝对地址
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).startsWith("/")) {
+                //https://xiaolincoding.com/images/system/download.png 转换成 https://xiaolincoding.com 去除.com 后面的内容
+                String baseUrl = document.baseUri().substring(0, document.baseUri().indexOf("."));
+                baseUrl =baseUrl + document.baseUri().replace(baseUrl,"").substring(0, document.baseUri().indexOf("/")-1);
+                list.set(i, baseUrl);
+            }
+        }
+
+        return list;
+    }
 
 
+    //下载 所有 链接的 内容
+    public static void downloadAllLinksContent(List<String> urls, String path ,String prefix) throws IOException {
 
-        //写入文件
+            Validate.notNull(urls, "urls 不能为空");
+            Validate.notNull(path, "path 不能为空");
+
+            //判断 urls https http
+            for (String s : urls) {
+                Validate.isTrue(s.startsWith("http") || s.startsWith("https"), "url 必须以 http 或 https 开头");
+            }
+
+            //判断 path 是否存在
+            File file = new File(path);
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+
+            for (String s : urls) {
+                downloadLinkContent(s, path,prefix);
+            }
+    }
+
+    //downloadLinkContent
+    public static void downloadLinkContent(String url, String path,String prefix)  {
         try {
-            FileWriter fileWriter = new FileWriter(file);
-            fileWriter.write(htmlStr);
-            fileWriter.flush();
-            fileWriter.close();
-        } catch (IOException e) {
+            URL url1 = new URL(url);
+            URLConnection urlConnection = url1.openConnection();
+            InputStream inputStream = urlConnection.getInputStream();
+            String fileName = url.substring(url.lastIndexOf("/") + 1);
+            //如果 prefix 为null 则不加前缀
+            if (prefix == null) {
+                prefix = "";
+            }
+
+            FileOutputStream fileOutputStream = new FileOutputStream(path + prefix+"_" +fileName);
+            byte[] bytes = new byte[1024];
+            int len = 0;
+            while ((len = inputStream.read(bytes)) != -1) {
+                fileOutputStream.write(bytes, 0, len);
+            }
+            fileOutputStream.flush();
+            fileOutputStream.close();
+            inputStream.close();
+        }catch (Exception e){
             e.printStackTrace();
         }
 
 
-        return filePath;
     }
 
 
-    //下载 url 中的所有图片
-    public void downloadImg(String url, String path) {
-        // 获取url中所有图片链接
-        List<String> imgUrls = getH5AllImg(url);
-        // 遍历每一个图片链接并下载
-        for (String imgUrl : imgUrls) {
-            String fileName = imgUrl.substring(imgUrl.lastIndexOf("/") + 1);
-            String filePath = path + fileName;
-            File file = new File(filePath);
-            File fileParent = file.getParentFile();
-            // 如果文件夹不存在，创建文件夹
-            if (!fileParent.exists()) {
-                boolean result = fileParent.mkdirs();
-                if (!result) {
-                    throw new RuntimeException("Failed to create directory: " + fileParent.getAbsolutePath());
-                }
-            }
 
-            // 下载图片
-            try {
-                URL urlObject = new URL(imgUrl);
-                URLConnection urlConnection = urlObject.openConnection();
-                InputStream inputStream = urlConnection.getInputStream();
-                FileOutputStream fileOutputStream = new FileOutputStream(file);
-                byte[] buffer = new byte[1024];
-                int length;
-                while ((length = inputStream.read(buffer)) != -1) {
-                    fileOutputStream.write(buffer, 0, length);
-                }
-                fileOutputStream.flush();
-                fileOutputStream.close();
-                inputStream.close();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+
+
+
+
+
+
+    //获取 Document 中 所有的 链接
+    public static Elements getLinks(Document document) throws IOException {
+
+        Validate.notNull(document, "document 不能为空");
+        //判断 document 是否  Document 对象
+        Validate.isTrue(document instanceof Document, "document 必须是 Document 对象");
+
+        Elements links = document.select("a[href]");
+
+        return links;
+    }
+
+    //获取 Document 中 所有的 链接 URL
+    public static List<String> getLinksUrl(Document document) throws IOException {
+
+        Validate.notNull(document, "document 不能为空");
+        //判断 document 是否  Document 对象
+        Validate.isTrue(document instanceof Document, "document 必须是 Document 对象");
+
+        Elements links = document.select("a[href]");
+
+        List<String> list = new ArrayList<>();
+
+        for (Element link : links) {
+            list.add(link.attr("abs:href"));
+        }
+
+        //去重
+        list = list.stream().distinct().collect(Collectors.toList());
+
+        list = extracted(document, list);
+
+        return list;
+    }
+
+
+    //获取 Document 中 所有的 资源链接 URL
+    public static List<String> getSourcesUrl(Document document) throws IOException {
+
+        Validate.notNull(document, "document 不能为空");
+        //判断 document 是否  Document 对象
+        Validate.isTrue(document instanceof Document, "document 必须是 Document 对象");
+
+        //获取所有的 link 和 图片
+        Elements links = document.select("link[href],img[src~=(?i)\\.(png|jpe?g|gif)]");
+
+        List<String> list = new ArrayList<>();
+
+        for (Element link : links) {
+            list.add(link.attr("abs:href"));
+        }
+
+        //去重
+        list = list.stream().distinct().collect(Collectors.toList());
+
+        list = extracted(document, list);
+
+        return list;
+    }
+
+
+    //JSON 转换为 Map
+    public static Map<String, Object> jsonToMap(String json) {
+        Map<String, Object> map = new HashMap<>();
+        JSONObject jsonObject = JSONObject.parseObject(json);
+        for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+            map.put(entry.getKey(), entry.getValue());
+        }
+        return map;
+    }
+
+
+
+
+
+
+    protected static void generateOutput() throws Exception {
+        JEditorPane ed = new JEditorPane(new URL("https://blog.csdn.net/wanglq0086/article/details/60761614"));
+        ed.setSize(2000,2000);
+
+        //create a new image
+        BufferedImage image = new BufferedImage(ed.getWidth(), ed.getHeight(),
+                BufferedImage.TYPE_INT_ARGB);
+
+        //paint the editor onto the image
+        SwingUtilities.paintComponent(image.createGraphics(),
+                ed,
+                new JPanel(),
+                0, 0, image.getWidth(), image.getHeight());
+        //save the image to file
+        ImageIO.write((RenderedImage)image, "png", new File("html.png"));
+    }
+    public static void main(String[] args) {
+        try {
+            generateOutput();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
+    //Document 转换为 图片 保存到本地
+    public static String documentToBufferedImage(Document document, String path) throws Exception {
+        Validate.notNull(document, "document不能为空");
+        Validate.isTrue(document instanceof Document, "document必须是Document对象");
+
+        Validate.notNull(path, "path不能为空");
+        File file = new File(path);
+        if (!file.exists()) {
+            boolean result = file.mkdirs(); // 优化1：使用 mkdirs() 方法创建多级目录
+            if (!result) {
+                throw new RuntimeException("Failed to create directory: " + file.getAbsolutePath());
+            }
+        }
+
+        // 创建 Swing 组件
+        JEditorPane ed = new JEditorPane();
+        ed.setContentType("text/html");
+        ed.setText(document.toString());
+        // 优化2：自动适应文档的大小
+        ed.setSize(ed.getPreferredSize());
+
+        // 创建 BufferedImage
+        BufferedImage image = new BufferedImage(ed.getWidth(), ed.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = image.createGraphics();
+        // 优化3：开启抗锯齿
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        // 绘制 Swing 组件
+        ed.print(g);
+
+        // 保存 BufferedImage 到本地
+        ImageIO.write(image, "png", new File(path, document.title() + ".png"));
+
+        return path;
+    }
 
 
-    //将htmlStr 中所有相对地址 换成 绝对地址
-                public String parseHtml(String url){
-                    Document h5Document = getH5Document(url);
-                    String baseUrl = h5Document.baseUri();
-
-                    Elements elements = h5Document.getAllElements();
-
-                    elements.forEach(e -> {
-                        e.getAllElements().forEach(f -> {
-                            Attributes attributes = f.attributes();
 
 
-                            attributes.forEach(k -> {
-
-                                String key = k.getKey();
-                                String value = k.getValue();
-
-                                //src href
-
-                                if (key.equals("href") || key.equals("src")) {
-                                    if (!value.startsWith("http") || !value.startsWith("https")) {
-                                        f.attr(key, value);
-                                    }
-                                }
-                            });
-                        });
-                    });
 
 
-                    return h5Document.html();
-                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
